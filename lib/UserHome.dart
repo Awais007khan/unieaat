@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -87,6 +88,11 @@ class _UserHomeState extends State<UserHome> {
 
     _loadFavoriteItems();
   }
+  List<Map<String, dynamic>> food = [
+    {"id": 1, "name": "Burger"},
+    {"id": 2, "name": "Pizza"},
+    {"id": 3, "name": "Pasta"},
+  ];
 
   void _filterFoods(String query) {
     setState(() {
@@ -95,11 +101,77 @@ class _UserHomeState extends State<UserHome> {
           .toList();
     });
   }
+  Widget _buildFoodSlider() {
+    final List<Widget> banners = [
+      _buildBanner("Food delivery", "Order food you love", "assets/burger.png", Colors.pink),
+      _buildBanner("Pick-Up", "Everyday up to 25% off", "assets/pasta.png", Colors.brown),
+      _buildBanner("Shops", "Grocery & more..", "assets/s.png", Color(0xFF85C0FC)),
+    ];
+
+    return CarouselSlider(
+      options: CarouselOptions(
+        height: 150,
+        autoPlay: true,
+        enlargeCenterPage: true,
+        viewportFraction: 0.9,
+        aspectRatio: 16 / 9,
+      ),
+      items: banners,
+    );
+  }
+  Widget _buildBanner(String title, String subtitle, String imagePath, Color bgColor) {
+    return Container(
+      margin: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+      decoration: BoxDecoration(
+        color: bgColor, // Background Color
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                subtitle,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(50),
+            child: Image.asset(
+              imagePath, // Image path passed dynamically
+              width: 80,
+              height: 80,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildFoodGrid() {
     return Column(
       children: [
+        // 🔹 Banner Container (Styled Like Your Image)
+        _buildFoodSlider(),
         Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.symmetric(horizontal: 12.0),
           child: TextField(
             controller: searchController,
             onChanged: _filterFoods,
@@ -110,6 +182,8 @@ class _UserHomeState extends State<UserHome> {
             ),
           ),
         ),
+
+        // 🔹 Food Grid
         Expanded(
           child: GridView.builder(
             padding: const EdgeInsets.all(12.0),
@@ -130,6 +204,7 @@ class _UserHomeState extends State<UserHome> {
       ],
     );
   }
+
 
   Widget _buildFoodCard(Map<String, dynamic> item, bool isFavorite) {
     return Card(
