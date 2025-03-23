@@ -59,7 +59,7 @@ class _UserHomeState extends State<UserHome> {
       setState(() {
         userName = user['name'] ?? "Guest";
         userEmail = user['email'] ?? "Guest";
-        userPhone = user['phone'] ?? "Guest";  // ✅ Added missing phone assignment
+        userPhone = user['phone'] ?? "Guest";
         useradress = user['address'] ?? "Guest";
       });
     } else {

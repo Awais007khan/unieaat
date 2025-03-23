@@ -44,7 +44,7 @@ class _OrderStatusPageState extends State<OrderStatusPage> {
               title: Text(order['foodName'] ?? "Unknown Food",
                   style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
               subtitle: Text("Status: ${order['status'] ?? "Pending"}"),
-              trailing: Text("₹${order['totalPrice']?.toString() ?? "0.0"}",
+              trailing: Text("Pkr${order['totalPrice']?.toString() ?? "0.0"}",
                   style: TextStyle(color: Colors.green)),
             )
 
