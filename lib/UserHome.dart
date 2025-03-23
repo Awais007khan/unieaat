@@ -15,22 +15,30 @@ class UserHome extends StatefulWidget {
 }
 
 class _UserHomeState extends State<UserHome> {
+  Map<String, dynamic>? userData;
+
   String userName = "Guest";
+  String userEmail = "Guest";
+  String useradress = "Guest";
+  String userPhone = "Guest";
   List<Map<String, dynamic>> foodItems = [];
   List<Map<String, dynamic>> cartItems = [];
   List<Map<String, dynamic>> userOrders = [];
 
   int _selectedIndex = 0;
-
+  final TextEditingController searchController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
+  TextEditingController addressController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   List<Map<String, dynamic>> favoriteItems = [];
-
+  List<Map<String, dynamic>> filteredFoodItems = []; // Filtered list
   @override
   void initState() {
     super.initState();
     _loadFoodItems();
     _loadUserData();
     _loadFavoriteItems();
+    filteredFoodItems = List.from(foodItems);
   }
 
   Future<void> _loadFoodItems() async {
@@ -41,14 +49,25 @@ class _UserHomeState extends State<UserHome> {
     });
   }
   Future<void> _loadUserData() async {
-    int userId = 1; // Replace with actual user ID
+    int userId = 1; // Replace this with actual logged-in user ID
     final user = await DatabaseHelper.instance.getUserById(userId);
+
+    print("Loaded user: $user"); // Debugging
+
     if (user != null) {
       setState(() {
         userName = user['name'] ?? "Guest";
+        userEmail = user['email'] ?? "Guest";
+        userPhone = user['phone'] ?? "Guest";  // ✅ Added missing phone assignment
+        useradress = user['address'] ?? "Guest";
       });
+    } else {
+      print("User not found in database!");
     }
   }
+
+
+
 
   Future<void> _loadFavoriteItems() async {
     int userId = 1; // Replace with actual logged-in user ID
@@ -69,60 +88,84 @@ class _UserHomeState extends State<UserHome> {
     _loadFavoriteItems();
   }
 
-
-
+  void _filterFoods(String query) {
+    setState(() {
+      filteredFoodItems = foodItems
+          .where((item) => item['name'].toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    });
+  }
   Widget _buildFoodGrid() {
-    return foodItems.isEmpty
-        ? const Center(child: Text("No food items available"))
-        : GridView.builder(
-      padding: const EdgeInsets.all(12.0),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 15,
-        mainAxisSpacing: 15,
-        childAspectRatio: 0.75,
-      ),
-      itemCount: foodItems.length,
-      itemBuilder: (context, index) {
-        final item = foodItems[index];
-        bool isFavorite = favoriteItems.any((fav) => fav['id'] == item['id']);
-        return Card(
-          color: Colors.amber.shade100,
-          elevation: 6,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          child: Column(
-            children: [
-              Expanded(
-                child: item['image'] != null && File(item['image']).existsSync()
-                    ? Image.file(File(item['image']), fit: BoxFit.cover)
-                    : const Icon(Icons.fastfood, size: 50, color: Colors.brown),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Column(
-                  children: [
-                    Text(item['name'], style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold)),
-                    Text("₹${item['price']}", style: GoogleFonts.poppins(fontSize: 16, color: Colors.green)),
-                    ElevatedButton(
-                      onPressed: () => _addToCart(item),
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.amber.shade700),
-                      child: const Text("+ Add to Cart", style: TextStyle(color: Colors.black)),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        isFavorite ? Icons.favorite : Icons.favorite_border,
-                        color: isFavorite ? Colors.red : Colors.grey,
-                      ),
-                      onPressed: () => _toggleFavorite(item),
-                    ),
-                  ],
-                ),
-              ),
-
-            ],
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: TextField(
+            controller: searchController,
+            onChanged: _filterFoods,
+            decoration: InputDecoration(
+              hintText: "Search food...",
+              prefixIcon: const Icon(Icons.search),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            ),
           ),
-        );
-      },
+        ),
+        Expanded(
+          child: GridView.builder(
+            padding: const EdgeInsets.all(12.0),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 15,
+              mainAxisSpacing: 15,
+              childAspectRatio: 0.75,
+            ),
+            itemCount: filteredFoodItems.length, // Use filtered list
+            itemBuilder: (context, index) {
+              final item = filteredFoodItems[index];
+              bool isFavorite = favoriteItems.any((fav) => fav['id'] == item['id']);
+              return _buildFoodCard(item, isFavorite);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFoodCard(Map<String, dynamic> item, bool isFavorite) {
+    return Card(
+      color: Colors.amber.shade100,
+      elevation: 6,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Column(
+        children: [
+          Expanded(
+            child: item['image'] != null && File(item['image']).existsSync()
+                ? Image.file(File(item['image']), fit: BoxFit.cover)
+                : const Icon(Icons.fastfood, size: 50, color: Colors.brown),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Column(
+              children: [
+                Text(item['name'], style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text("Pkr${item['price']}", style: GoogleFonts.poppins(fontSize: 16, color: Colors.green)),
+                ElevatedButton(
+                  onPressed: () => _addToCart(item),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.amber.shade700),
+                  child: const Text("+ Add to Cart", style: TextStyle(color: Colors.black)),
+                ),
+                IconButton(
+                  icon: Icon(
+                    isFavorite ? Icons.favorite : Icons.favorite_border,
+                    color: isFavorite ? Colors.red : Colors.grey,
+                  ),
+                  onPressed: () => _toggleFavorite(item),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -212,8 +255,27 @@ class _UserHomeState extends State<UserHome> {
     );
   }
 
+  Future<void> _updateUserData() async {
+    if (userData == null) return;
 
+    int userId = userData!['id']; // Get user ID
+    String newPhone = phoneController.text.trim();
+    String newAddress = addressController.text.trim();
+
+    // Update database
+    await DatabaseHelper.instance.updateUser(userId, newPhone, newAddress);
+
+    // Reload data
+    _loadUserData();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Profile updated successfully!")),
+    );
+  }
   void _showAddressBottomSheet() {
+    TextEditingController _phoneController = TextEditingController();
+    TextEditingController _landmarkController = TextEditingController();
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -223,36 +285,61 @@ class _UserHomeState extends State<UserHome> {
           padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
           child: Container(
             padding: const EdgeInsets.all(16),
-            height: 250,
+            height: 350, // Increased height for extra fields
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Enter Your Address",
+                  "Enter Delivery Details",
                   style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
                 ),
                 const SizedBox(height: 10),
+
+                // Address Field
                 TextField(
                   controller: _addressController,
-                  autofillHints: null, // Disables autofill
                   decoration: InputDecoration(
                     hintText: "Enter delivery address",
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                 ),
+                const SizedBox(height: 10),
+
+                // Phone Number Field
+                TextField(
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  decoration: InputDecoration(
+                    hintText: "Enter your phone number",
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // Landmark Field
+                TextField(
+                  controller: _landmarkController,
+                  decoration: InputDecoration(
+                    hintText: "Enter nearby landmark",
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                ),
                 const SizedBox(height: 20),
+
                 ElevatedButton(
                   onPressed: () async {
-                    if (_addressController.text.isNotEmpty) {
+                    if (_addressController.text.isNotEmpty && _phoneController.text.isNotEmpty) {
                       Navigator.pop(context);
 
-                      int userId = 1;  // Replace with actual user ID
-                      String address = _addressController.text; // User input address
+                      int userId = 1; // Replace with actual user ID
+                      String address = _addressController.text;
+                      String phoneNumber = _phoneController.text;
+                      String landmark = _landmarkController.text;
 
                       for (var item in cartItems) {
                         int foodItemId = item['id'];
-                        String foodName = item['name'];  // Get original name from cart
-                        double price = item['price'];  // Get original price from cart
+                        String foodName = item['name'];
+                        double price = item['price'];
                         int quantity = 1;
 
                         await DatabaseHelper.instance.placeOrder(
@@ -263,10 +350,9 @@ class _UserHomeState extends State<UserHome> {
                           address,
                           "Cash",
                           foodName,
+                          phoneNumber,
+                          landmark,
                         );
-
-
-
                       }
 
                       setState(() => cartItems.clear()); // Clear cart after order
@@ -278,8 +364,6 @@ class _UserHomeState extends State<UserHome> {
                   ),
                   child: const Text("Confirm Address", style: TextStyle(color: Colors.black)),
                 ),
-
-
               ],
             ),
           ),
@@ -287,6 +371,7 @@ class _UserHomeState extends State<UserHome> {
       },
     );
   }
+
   Widget _buildCartPage() {
     return Scaffold(
       backgroundColor: Colors.amber.shade50,
@@ -333,7 +418,6 @@ class _UserHomeState extends State<UserHome> {
   }
   Widget profilepage() {
     return Scaffold(
-
       body: Center(
         child: Container(
           padding: const EdgeInsets.all(20),
@@ -361,10 +445,28 @@ class _UserHomeState extends State<UserHome> {
                 ),
               ),
               const SizedBox(height: 10),
+
+              _buildInfoRow(Icons.email, userEmail),
+
+              _buildEditableRow(Icons.phone, userPhone, "Edit Phone", (newValue) {
+                setState(() {
+                  userPhone = newValue;
+                });
+              }),
+
+              _buildEditableRow(Icons.home, useradress, "Edit Address", (newValue) {
+                setState(() {
+                  useradress = newValue;
+                });
+              }),
+
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   Navigator.pushReplacement(
-                      context, MaterialPageRoute(builder: (_) => const LoginScreen()));// Go back
+                    context,
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.amber,
@@ -377,6 +479,92 @@ class _UserHomeState extends State<UserHome> {
       ),
     );
   }
+
+// 🔹 Function to build editable row
+  Widget _buildEditableRow(IconData icon, String value, String title, Function(String) onSave) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            Icon(icon, color: Colors.black54),
+            const SizedBox(width: 10),
+            Text(value, style: const TextStyle(fontSize: 16)),
+          ],
+        ),
+        IconButton(
+          icon: const Icon(Icons.edit, color: Colors.yellow),
+          onPressed: () {
+            _showEditDialog(title, value, onSave);
+          },
+        ),
+      ],
+    );
+  }
+
+// 🔹 Function to show Edit Dialog
+  void _showEditDialog(String title, String currentValue, Function(String) onSave) {
+    TextEditingController controller = TextEditingController(text: currentValue);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(title),
+          content: TextField(
+            controller: controller,
+            decoration: const InputDecoration(border: OutlineInputBorder()),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                onSave(controller.text);
+                Navigator.pop(context);
+              },
+              child: const Text("Save"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildEditableField(IconData icon, String label, TextEditingController controller) {
+    return Row(
+      children: [
+        Icon(icon, color: Colors.black),
+        SizedBox(width: 10),
+        Expanded(
+          child: TextField(
+            controller: controller,
+            decoration: InputDecoration(labelText: label),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: Colors.black54, size: 20),
+          const SizedBox(width: 10),
+          Text(
+            text,
+            style: const TextStyle(fontSize: 16, color: Colors.black87),
+          ),
+        ],
+      ),
+    );
+  }
+
   List<Widget> get _pages => [
     _buildFoodGrid(),
     _buildCartPage(),

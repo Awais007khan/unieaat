@@ -85,7 +85,7 @@ class _OrdersPageState extends State<OrdersPage> {
                    ),
                  ),
                  title: Text(
-                   "Total: \$${order['totalPrice']}",
+                   "Total: PKR ${order['totalPrice']}",
                    style: GoogleFonts.poppins(
                      fontSize: 18,
                      fontWeight: FontWeight.bold,
@@ -98,11 +98,62 @@ class _OrdersPageState extends State<OrdersPage> {
                      const SizedBox(height: 8),
                      Row(
                        children: [
+                         Icon(Icons.fastfood, color: Colors.orange, size: 18),
+                         const SizedBox(width: 5),
+                         Expanded(
+                           child: Text(
+                             "Food: ${order['foodName'] ?? 'N/A'}", // Show food name
+                             style: GoogleFonts.poppins(
+                               fontSize: 14,
+                               fontWeight: FontWeight.w500,
+                               color: Colors.black87,
+                             ),
+                             overflow: TextOverflow.ellipsis,
+                             maxLines: 1,
+                           ),
+                         ),
+                       ],
+                     ),
+                     const SizedBox(height: 8),
+                     Row(
+                       children: [
                          Icon(Icons.location_on, color: Colors.red, size: 18),
                          const SizedBox(width: 5),
                          Expanded(
                            child: Text(
                              order['address'],
+                             style: GoogleFonts.poppins(
+                               fontSize: 14,
+                               color: Colors.black54,
+                             ),
+                             overflow: TextOverflow.ellipsis,
+                             maxLines: 2,
+                           ),
+                         ),
+                       ],
+                     ),
+                     const SizedBox(height: 8),
+                     Row(
+                       children: [
+                         Icon(Icons.phone, color: Colors.blue, size: 18),
+                         const SizedBox(width: 5),
+                         Text(
+                           order['phoneNumber'] ?? 'N/A', // Show phone number
+                           style: GoogleFonts.poppins(
+                             fontSize: 14,
+                             color: Colors.black54,
+                           ),
+                         ),
+                       ],
+                     ),
+                     const SizedBox(height: 8),
+                     Row(
+                       children: [
+                         Icon(Icons.location_city, color: Colors.purple, size: 18),
+                         const SizedBox(width: 5),
+                         Expanded(
+                           child: Text(
+                             order['landmark'] ?? 'No landmark provided', // Show landmark
                              style: GoogleFonts.poppins(
                                fontSize: 14,
                                color: Colors.black54,
@@ -130,6 +181,7 @@ class _OrdersPageState extends State<OrdersPage> {
                      ),
                    ],
                  ),
+
                  trailing: PopupMenuButton<String>(
                    icon: const Icon(Icons.more_vert, color: Colors.black),
                    onSelected: (status) => _updateOrderStatus(order['id'], status),

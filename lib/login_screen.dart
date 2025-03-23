@@ -4,6 +4,8 @@ import 'package:unieaat/UserHome.dart';
 import 'package:unieaat/services/database_service.dart';
 import 'package:unieaat/signup_screen.dart';
 
+import 'ForgetPasswordScreen.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -107,6 +109,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold),
               ),
             ),
+            const SizedBox(height: 5),
+            TextButton(
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const ForgetPasswordScreen()));
+              },
+              child: const Text("Forgot Password?", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+            ),
+
           ],
         ),
       ),

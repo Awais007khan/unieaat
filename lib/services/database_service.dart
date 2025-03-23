@@ -27,13 +27,15 @@ class DatabaseHelper {
 
   Future<void> _createDB(Database db, int version) async {
     await db.execute('''
-      CREATE TABLE users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT,
-        email TEXT UNIQUE,
-        password TEXT,
-        role TEXT
-      )
+     CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    email TEXT UNIQUE,
+    password TEXT,
+    phone TEXT,     -- ✅ Added phone field
+    address TEXT,   -- ✅ Added address field
+    role TEXT
+)
     ''');
     await db.execute('''
   CREATE TABLE orders (
@@ -44,12 +46,14 @@ class DatabaseHelper {
     quantity INTEGER,
     totalPrice REAL,
     address TEXT,
+      phoneNumber TEXT,  -- ✅ New column
+      landmark TEXT,
     status TEXT,
     paymentMethod TEXT
   )
 ''');
 
-    Future<void> createTables(Database db) async {
+
       await db.execute('''
     CREATE TABLE IF NOT EXISTS orders (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -59,11 +63,13 @@ class DatabaseHelper {
       quantity INTEGER,
       totalPrice REAL,
       address TEXT,
+       phoneNumber TEXT,
+      landmark TEXT,
       status TEXT,
       paymentMethod TEXT
     )
   ''');
-    }
+
 
     await db.execute('''
       CREATE TABLE food_items (
@@ -82,6 +88,8 @@ class DatabaseHelper {
     quantity INTEGER,
     totalPrice REAL,
     address TEXT,
+      phoneNumber TEXT,  -- ✅ New column
+      landmark TEXT,
     status TEXT DEFAULT 'Pending',
     orderDate TEXT DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (userId) REFERENCES users(id),
@@ -101,37 +109,85 @@ class DatabaseHelper {
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
       await db.execute('ALTER TABLE orders ADD COLUMN foodName TEXT');
+      await db.execute('ALTER TABLE orders ADD COLUMN phoneNumber TEXT'); // ✅ Add phoneNumber here
     }
 
   }
 
 
-  Future<void> placeOrder(int userId, int foodItemId, int quantity, double price, String address, String paymentMethod, String foodName) async {
+  Future<void> placeOrder(
+      int userId,
+      int foodItemId,
+      int quantity,
+      double price,
+      String address,
+      String paymentMethod,
+      String foodName,
+      String phoneNumber,
+      String landmark,
+      ) async {
     final db = await DatabaseHelper.instance.database;
     await db.insert(
       'orders',
       {
         'userId': userId,
         'foodItemId': foodItemId,
-        'foodName': foodName,  // ✅ Now this will be stored
+        'foodName': foodName,
         'quantity': quantity,
         'totalPrice': price,
         'address': address,
+        'phoneNumber': phoneNumber,
+        'landmark': landmark,
         'status': 'Processing',
         'paymentMethod': paymentMethod,
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
+  Future<int> updateUser(int id, String phone, String address) async {
+    final db = await database;
+    return await db.update(
+      'users',
+      {'phone': phone, 'address': address},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
   Future<Map<String, dynamic>?> getUserById(int userId) async {
     final db = await database;
     List<Map<String, dynamic>> result = await db.query(
-      'users', // Replace with your actual table name
+      'users',
+      columns: ['id', 'name', 'email', 'phone', 'address', 'role'],
       where: 'id = ?',
       whereArgs: [userId],
       limit: 1,
     );
 
+    if (result.isNotEmpty) {
+      return result.first; // Return user data if found
+    }
+    return null; // Return null if no user found
+  }
+
+  Future<void> updateFoodPrice(int id, String name, double price, String imagePath) async {
+    final db = await database;
+    await db.update(
+      'food_items', // ✅ Corrected table name
+      {'name': name, 'price': price, 'image': imagePath},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+
+  Future<Map<String, dynamic>?> getUserByEmail(String email) async {
+    final db = await database;
+    List<Map<String, dynamic>> result = await db.query(
+      'users',
+      where: 'email = ?',
+      whereArgs: [email],
+    );
     return result.isNotEmpty ? result.first : null;
   }
 
@@ -219,16 +275,18 @@ class DatabaseHelper {
     WHERE fav.user_id = ?
   ''', [userId]);
   }
-
-  Future<int> createUser(String name, String email, String password, String role) async {
+  Future<int> createUser(String name, String email, String password, String phone, String address, String role) async {
     final db = await instance.database;
     return await db.insert('users', {
       'name': name,
       'email': email,
       'password': password,
+      'phone': phone, // 🔹 Added
+      'address': address, // 🔹 Added
       'role': role,
     });
   }
+
 
   Future<Map<String, dynamic>?> getUser(String email, String password) async {
     final db = await instance.database;

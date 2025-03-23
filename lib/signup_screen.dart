@@ -13,21 +13,27 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController(); // 🔹 Added
+  final TextEditingController addressController = TextEditingController(); // 🔹 Added
   String role = "user";
 
   Future<void> registerUser() async {
     String name = nameController.text.trim();
     String email = emailController.text.trim();
     String password = passwordController.text.trim();
+    String phone = phoneController.text.trim();
+    String address = addressController.text.trim();
 
-    if (name.isEmpty || email.isEmpty || password.isEmpty) {
+    if (name.isEmpty || email.isEmpty || password.isEmpty || phone.isEmpty ||
+        address.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('All fields are required')),
       );
       return;
     }
 
-    await DatabaseHelper.instance.createUser(name, email, password, role);
+    await DatabaseHelper.instance.createUser(
+        name, email, password, phone, address, role);
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Signup Successful! Login now')),
@@ -52,84 +58,102 @@ class _SignupScreenState extends State<SignupScreen> {
             elevation: 5,
             child: Padding(
               padding: const EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    "Sign Up",
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  TextField(
-                    controller: nameController,
-                    decoration: InputDecoration(
-                      labelText: "Name",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+              child: SingleChildScrollView( // ✅ Wrap the column in SingleChildScrollView
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  // ✅ This ensures the Column doesn't take up extra space
+                  children: [
+                    const Text(
+                      "Sign Up",
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 15),
-                  TextField(
-                    controller: emailController,
-                    decoration: InputDecoration(
-                      labelText: "Email",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: nameController,
+                      decoration: InputDecoration(
+                        labelText: "Name",
+                        border: OutlineInputBorder(borderRadius: BorderRadius
+                            .circular(10)),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 15),
-                  TextField(
-                    controller: passwordController,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      labelText: "Password",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+                    const SizedBox(height: 15),
+                    TextField(
+                      controller: emailController,
+                      decoration: InputDecoration(
+                        labelText: "Email",
+                        border: OutlineInputBorder(borderRadius: BorderRadius
+                            .circular(10)),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 15),
-                  DropdownButtonFormField<String>(
-                    value: role,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+                    const SizedBox(height: 15),
+                    TextField(
+                      controller: passwordController,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        labelText: "Password",
+                        border: OutlineInputBorder(borderRadius: BorderRadius
+                            .circular(10)),
                       ),
                     ),
-                    items: ["user", "admin"].map((String value) {
-                      return DropdownMenuItem(
-                        value: value,
-                        child: Text(value.toUpperCase()),
-                      );
-                    }).toList(),
-                    onChanged: (value) => setState(() => role = value!),
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: registerUser,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.yellow[700],
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                    const SizedBox(height: 15),
+                    TextField(
+                      controller: phoneController,
+                      keyboardType: TextInputType.phone,
+                      decoration: InputDecoration(
+                        labelText: "Phone Number",
+                        border: OutlineInputBorder(borderRadius: BorderRadius
+                            .circular(10)),
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+                    TextField(
+                      controller: addressController,
+                      decoration: InputDecoration(
+                        labelText: "Address",
+                        border: OutlineInputBorder(borderRadius: BorderRadius
+                            .circular(10)),
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+                    DropdownButtonFormField<String>(
+                      value: role,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(borderRadius: BorderRadius
+                            .circular(10)),
+                      ),
+                      items: ["user", "admin"].map((String value) {
+                        return DropdownMenuItem(
+                          value: value,
+                          child: Text(value.toUpperCase()),
+                        );
+                      }).toList(),
+                      onChanged: (value) => setState(() => role = value!),
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: registerUser,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.yellow[700],
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                        ),
+                        child: const Text(
+                          "Sign Up",
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                       ),
-                      child: const Text(
-                        "Sign Up",
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
