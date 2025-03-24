@@ -36,11 +36,98 @@ class _UserHomeState extends State<UserHome> {
   @override
   void initState() {
     super.initState();
+    initIAP();
     _loadFoodItems();
     _loadUserData();
     _loadFavoriteItems();
     filteredFoodItems = List.from(foodItems);
+    FlutterInappPurchase.purchaseUpdated.listen((productItem) async {
+      if (productItem!.transactionStateIOS == TransactionState.purchased) {
+        await _savePurchaseStatus();
+        await showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                backgroundColor: const Color(0xFF122342),
+                title: const Text(
+                  'Restart App',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                content: const Text(
+                  'You need to restart the app to activate the Pro features.',
+                  style: TextStyle(color: Colors.white70),
+                ),
+                shape: RoundedRectangleBorder(
+                  // ignore: prefer_const_constructors
+                  side: BorderSide(
+                    color: const Color(0xFF00FFFF), // Border color
+                    width: 2.0, // Border width
+                  ),
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                actions: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Align(
+                        alignment: Alignment.center,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: const Color(0xFF00FFFF),
+                              width: 2,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.all(5),
+                          child: TextButton(
+                            onPressed: () async {
+                              await _savePurchaseStatus();
+                              SystemChannels.platform
+                                  .invokeMethod('SystemNavigator.pop');
+                              await Future.delayed(
+                                  const Duration(milliseconds: 500));
+                              Navigator.of(context).pushAndRemoveUntil(
+                                MaterialPageRoute(
+                                    builder: (context) => const LoginScreen()),
+                                    (Route<dynamic> route) => false,
+                              );
+                            },
+                            child: const Text(
+                              'Restart Now',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+
+                ],
+              );
+            });
+
+
+
+      } else {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const LoginScreen(),
+          ),
+        );
+      }
+    });
+    FlutterInappPurchase.purchaseError.listen((purchaseError) {
+      print('Purchase Error: $purchaseError');
+    });
   }
+
 
   Future<void> _loadFoodItems() async {
     final items = await DatabaseHelper.instance.getFoodItems();
@@ -48,6 +135,57 @@ class _UserHomeState extends State<UserHome> {
     setState(() {
       foodItems = items;
     });
+  }
+  Future<void> initIAP() async {
+    try {
+      final status = await FlutterInappPurchase.instance.initialize();
+      print('IAP initialized successfully.');
+
+      List<IAPItem> items =
+      await FlutterInappPurchase.instance.getProducts(['com.xray.weekly']);
+      print("items");
+      if (items.isNotEmpty &&
+          items[0].price != null &&
+          items[0].currency != null) {
+        setState(() {
+          _productPrice = items[0].price!;
+          _productCurrency = items[0].currency!;
+        });
+      }
+    } catch (error) {
+      print('Error initializing IAP: $error');
+    }
+  }
+
+  Future<void> initiatePurchase() async {
+    try {
+      await initIAP();
+
+      List<String> productIds = ['com.xray.weekly'];
+
+      for (var productId in productIds) {
+        List<IAPItem> items =
+        await FlutterInappPurchase.instance.getProducts([productId]);
+        print(items);
+
+        print('Number of products for $productId: ${items.length}');
+        for (var item in items) {
+          print('Product ID: ${item.productId}');
+          print('Title: ${item.title}');
+          print('Description: ${item.description}');
+          print('Price: ${item.price}');
+        }
+
+        if (items.isNotEmpty && items[0].productId != null) {
+          await FlutterInappPurchase.instance
+              .requestPurchase(items[0].productId!);
+        } else {
+          print('Product ID is null or empty for $productId.');
+        }
+      }
+    } catch (error) {
+      print('Error purchasing: $error');
+    }
   }
   Future<void> _loadUserData() async {
     int userId = 1; // Replace this with actual logged-in user ID
@@ -405,8 +543,8 @@ class _UserHomeState extends State<UserHome> {
                   onPressed: () async {
                     if (_addressController.text.isNotEmpty && _phoneController.text.isNotEmpty) {
                       Navigator.pop(context);
-
-                      int userId = 1; // Replace with actual user ID
+                      initiatePurchase();
+                      int userId = 1;
                       String address = _addressController.text;
                       String phoneNumber = _phoneController.text;
                       String landmark = _landmarkController.text;
@@ -577,7 +715,6 @@ class _UserHomeState extends State<UserHome> {
     );
   }
 
-// 🔹 Function to show Edit Dialog
   void _showEditDialog(String title, String currentValue, Function(String) onSave) {
     TextEditingController controller = TextEditingController(text: currentValue);
 
