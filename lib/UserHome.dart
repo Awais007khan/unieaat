@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
@@ -29,12 +28,11 @@ class _UserHomeState extends State<UserHome> {
   List<Map<String, dynamic>> foodItems = [];
   List<Map<String, dynamic>> cartItems = [];
   List<Map<String, dynamic>> userOrders = [];
-
+  String selectedCategory = "";
   int _selectedIndex = 0;
   final TextEditingController searchController = TextEditingController();
   TextEditingController phoneController = TextEditingController();
   TextEditingController addressController = TextEditingController();
-  final TextEditingController _addressController = TextEditingController();
   List<Map<String, dynamic>> favoriteItems = [];
   List<Map<String, dynamic>> filteredFoodItems = []; // Filtered list
   @override
@@ -44,6 +42,7 @@ class _UserHomeState extends State<UserHome> {
     _loadFoodItems();
     _loadUserData();
     _loadFavoriteItems();
+    addInitialFoodData();
     filteredFoodItems = List.from(foodItems);
     FlutterInappPurchase.purchaseUpdated.listen((productItem) async {
       if (productItem!.transactionStateIOS == TransactionState.purchased) {
@@ -125,6 +124,19 @@ class _UserHomeState extends State<UserHome> {
     FlutterInappPurchase.purchaseError.listen((purchaseError) {
       print('Purchase Error: $purchaseError');
     });
+  }
+  void addInitialFoodData() async {
+    final dbHelper = DatabaseHelper.instance;
+
+    await dbHelper.insertFoodItems(burgerList);
+    await dbHelper.insertFoodItems(pizzaList);
+    await dbHelper.insertFoodItems(noodlesList);
+    await dbHelper.insertFoodItems(meatList);
+    await dbHelper.insertFoodItems(vegetableList);
+    await dbHelper.insertFoodItems(dessertList);
+
+
+    print("Food items inserted successfully!");
   }
 
   Future<void> _loadFoodItems() async {
@@ -242,6 +254,7 @@ class _UserHomeState extends State<UserHome> {
     });
   }
 
+
   Widget _buildFoodSlider() {
     final List<Widget> banners = [
       _buildBanner(
@@ -323,84 +336,326 @@ class _UserHomeState extends State<UserHome> {
       ),
     );
   }
+    List<Map<String, dynamic>> burgerList = [
+      {
+        "name": "Burger Bistro",
+        "restaurant": "Rose Garden",
+        "price": 40,
+        "image": "assets/images/burger_bistro.png"
+      },
+      {
+        "name": "Smokin' Burger",
+        "restaurant": "Cafenio Restaurant",
+        "price": 60,
+        "image": "assets/images/smokin_burger.png"
+      },
+      {
+        "name": "Buffalo Burgers",
+        "restaurant": "Kaji Firm Kitchen",
+        "price": 75,
+        "image": "assets/images/buffalo_burger.png"
+      },
+      {
+        "name": "Bullseye Burgers",
+        "restaurant": "Kabab Restaurant",
+        "price": 94,
+        "image": "assets/images/bullseye_burger.png"
+      }
+    ];
+    List<Map<String, dynamic>> pizzaList = [
+      {
+        "name": "Cheese Lovers",
+        "restaurant": "Pizza Hut",
+        "price": 30,
+        "image": "assets/images/cheese_lovers.png"
+      },
+      {
+        "name": "Pepperoni Feast",
+        "restaurant": "Dominos",
+        "price": 45,
+        "image": "assets/images/pepperoni_pizza.png"
+      },
+      {
+        "name": "BBQ Chicken Pizza",
+        "restaurant": "Papa Johns",
+        "price": 50,
+        "image": "assets/images/bbq_chicken_pizza.png"
+      },
+      {
+        "name": "Veggie Delight",
+        "restaurant": "Local Pizzeria",
+        "price": 35,
+        "image": "assets/images/veggie_pizza.png"
+      }
+    ];
+  List<Map<String, dynamic>> noodlesList = [
+    {
+      "name": "Spicy Chicken Noodles",
+      "restaurant": "Asian Bites",
+      "price": 50,
+      "image": "assets/images/Noodles_1.png"
+    },
+    {
+      "name": "Garlic Butter Noodles",
+      "restaurant": "Noodle House",
+      "price": 40,
+      "image": "assets/images/Noodles_2.png"
+    },
+    {
+      "name": "Schezwan Noodles",
+      "restaurant": "Dragon Wok",
+      "price": 55,
+      "image": "assets/images/Noodles_3.png"
+    },
+    {
+      "name": "Veggie Stir-Fry Noodles",
+      "restaurant": "Green Kitchen",
+      "price": 45,
+      "image": "assets/images/Noodles_4.png"
+    }
+  ];
+  List<Map<String, dynamic>> meatList = [
+    {
+      "name": "Grilled Steak",
+      "restaurant": "Steak House",
+      "price": 120,
+      "image": "assets/images/meat_1.png"
+    },
+    {
+      "name": "BBQ Ribs",
+      "restaurant": "Smokehouse Grill",
+      "price": 150,
+      "image": "assets/images/meat_2.png"
+    },
+    {
+      "name": "Lamb Chops",
+      "restaurant": "Mediterranean Delight",
+      "price": 180,
+      "image": "assets/images/meat_3.png"
+    },
+    {
+      "name": "Tandoori Chicken",
+      "restaurant": "Spicy Corner",
+      "price": 100,
+      "image": "assets/images/meat_4.png"
+    }
+  ];
+  List<Map<String, dynamic>> vegetableList = [
+    {
+      "name": "Fresh Salad",
+      "restaurant": "Healthy Bites",
+      "price": 30,
+      "image": "assets/images/vegetable_1.png"
+    },
+    {
+      "name": "Grilled Veggies",
+      "restaurant": "Green Delight",
+      "price": 40,
+      "image": "assets/images/vegetable_2.png"
+    },
+    {
+      "name": "Mixed Stir-Fry",
+      "restaurant": "Veggie Heaven",
+      "price": 35,
+      "image": "assets/images/vegetable_3.png"
+    },
+    {
+      "name": "Broccoli & Carrot Mix",
+      "restaurant": "Organic Kitchen",
+      "price": 45,
+      "image": "assets/images/vegetable_4.png"
+    }
+  ];
+  List<Map<String, dynamic>> dessertList = [
+    {
+      "name": "Chocolate Cake",
+      "restaurant": "Sweet Treats",
+      "price": 50,
+      "image": "assets/images/dessert_1.png"
+    },
+    {
+      "name": "Ice Cream Sundae",
+      "restaurant": "Frosty Delights",
+      "price": 40,
+      "image": "assets/images/dessert_2.png"
+    },
+    {
+      "name": "Strawberry Cheesecake",
+      "restaurant": "Cheese Heaven",
+      "price": 55,
+      "image": "assets/images/dessert_3.png"
+    },
+    {
+      "name": "Brownie with Ice Cream",
+      "restaurant": "Chocolate House",
+      "price": 45,
+      "image": "assets/images/dessert_4.png"
+    }
+  ];
+
+  Widget _buildFoodItem(void Function(String) onCategorySelected) {
+      final List<Map<String, String>> categories = [
+        {"icon": "🍔", "label": "Hamburger"},
+        {"icon": "🍕", "label": "Pizza"},
+        {"icon": "🍜", "label": "Noodles"},
+        {"icon": "🍖", "label": "Meat"},
+        {"icon": "🥬", "label": "Vegetables"},
+        {"icon": "🍰", "label": "Dessert"},
+
+      ];
+
+      return GridView.builder(
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 4,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          childAspectRatio: 1,
+        ),
+        itemCount: categories.length,
+        itemBuilder: (context, index) {
+          final category = categories[index];
+          return GestureDetector(
+            onTap: () => onCategorySelected(category["label"]!), // Call function when tapped
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  category["icon"]!,
+                  style: TextStyle(fontSize: 40),
+                ),
+                SizedBox(height: 5),
+                Text(
+                  category["label"]!,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black87,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    }
 
   Widget _buildFoodGrid() {
+    List<Map<String, dynamic>> displayList = [];
+
+    if (selectedCategory == "Hamburger") {
+      displayList = burgerList;
+    } else if (selectedCategory == "Pizza") {
+      displayList = pizzaList;
+    }else if (selectedCategory == "Noodles") {
+    displayList = noodlesList;
+    } else if (selectedCategory == "Meat") {
+      displayList = meatList;
+    } else if (selectedCategory == "Vegetables") {
+      displayList = vegetableList;
+    } else if (selectedCategory == "Dessert") {
+      displayList = dessertList;
+    }
+
+    else{
+      displayList = foodItems;
+    }
+
     return Column(
       children: [
-        _buildFoodSlider(),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0),
-          child: TextField(
-            controller: searchController,
-            onChanged: _filterFoods,
-            decoration: InputDecoration(
-              hintText: "Search food...",
-              prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
-        ),
-
-        // 🔹 Food Grid
         Expanded(
-          child: GridView.builder(
-            padding: const EdgeInsets.all(12.0),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 15,
-              mainAxisSpacing: 15,
-              childAspectRatio: 0.75,
+          child: SingleChildScrollView(  // 🔹 Wrap Column with SingleChildScrollView
+            child: Column(
+              children: [
+                SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: TextField(
+                    controller: searchController,
+                    onChanged: _filterFoods,
+                    decoration: InputDecoration(
+                      hintText: "Search food...",
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+                _buildFoodSlider(),
+                _buildFoodItem((selected) {
+                  setState(() {
+                    selectedCategory = selected; // Update category
+                  });
+                }),
+                SizedBox(height: 10), // Extra spacing to prevent tight layout
+                GridView.builder(
+                  shrinkWrap: true, // 🔹 Important: GridView ko wrap content banata hai
+                  physics: NeverScrollableScrollPhysics(), // 🔹 Scrolling prevent karega (kyunki parent scrollable hai)
+                  padding: const EdgeInsets.all(12.0),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 15,
+                    mainAxisSpacing: 15,
+                    childAspectRatio: 0.75,
+                  ),
+                  itemCount: displayList.length,
+                  itemBuilder: (context, index) {
+                    final item = displayList[index];
+                    bool isFavorite = favoriteItems.any(
+                          (fav) => fav['name'] == item['name'],
+                    );
+                    return _buildFoodCard(item, isFavorite);
+                  },
+                ),
+              ],
             ),
-            itemCount: filteredFoodItems.length, // Use filtered list
-            itemBuilder: (context, index) {
-              final item = filteredFoodItems[index];
-              bool isFavorite = favoriteItems.any(
-                (fav) => fav['id'] == item['id'],
-              );
-              return _buildFoodCard(item, isFavorite);
-            },
           ),
         ),
       ],
     );
+
+
+
+
   }
+
 
   Widget _buildFoodCard(Map<String, dynamic> item, bool isFavorite) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       elevation: 3,
       child: Container(
-        height: 220, // Fixed height to prevent overflow
+        height: 300, // Fixed height to prevent overflow
         padding: const EdgeInsets.all(10.0),
         child: SingleChildScrollView(
-          // ✅ Makes Column Scrollable
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // 🟡 Image with Cart Icon
               Stack(
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child:
-                        item['image'] != null &&
-                                File(item['image']).existsSync()
-                            ? Image.file(
-                              File(item['image']),
-                              width: double.infinity,
-                              height: 100,
-                              fit: BoxFit.cover,
-                            )
-                            : Image.asset(
-                              'assets/burger.png',
-                              width: double.infinity,
-                              height: 100,
-                              fit: BoxFit.contain,
-                            ),
+                  GestureDetector(
+
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: item['image'] != null && File(item['image']).existsSync()
+                          ? Image.file(
+                        File(item['image']),
+                        width: double.infinity,
+                        height: 100,
+                        fit: BoxFit.cover,
+                      )
+                          : Image.asset(
+                        'assets/burger.png',
+                        width: double.infinity,
+                        height: 100,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
                   ),
-                  // 🛒 Cart Icon
                   Positioned(
                     top: 8,
                     right: 8,
@@ -423,7 +678,6 @@ class _UserHomeState extends State<UserHome> {
               ),
               const SizedBox(height: 8),
 
-              // 🟡 Food Details
               Text(
                 item['name'],
                 style: GoogleFonts.poppins(
@@ -599,7 +853,6 @@ class _UserHomeState extends State<UserHome> {
         return;
       }
 
-      // Check and request permissions
       permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
@@ -755,126 +1008,6 @@ class _UserHomeState extends State<UserHome> {
       },
     );
   }
-  // void _showAddressBottomSheet() {
-  //   TextEditingController _phoneController = TextEditingController();
-  //   TextEditingController _landmarkController = TextEditingController();
-  //
-  //   showModalBottomSheet(
-  //     context: context,
-  //     isScrollControlled: true,
-  //     backgroundColor: Colors.amber.shade50,
-  //     builder: (context) {
-  //       return Padding(
-  //         padding: EdgeInsets.only(
-  //           bottom: MediaQuery.of(context).viewInsets.bottom,
-  //         ),
-  //         child: Container(
-  //           padding: const EdgeInsets.all(16),
-  //           height: 350, // Increased height for extra fields
-  //           child: Column(
-  //             crossAxisAlignment: CrossAxisAlignment.start,
-  //             children: [
-  //               Text(
-  //                 "Enter Delivery Details",
-  //                 style: GoogleFonts.poppins(
-  //                   fontSize: 20,
-  //                   fontWeight: FontWeight.bold,
-  //                   color: Colors.black,
-  //                 ),
-  //               ),
-  //               const SizedBox(height: 10),
-  //
-  //               // Address Field
-  //               TextField(
-  //                 controller: _addressController,
-  //                 decoration: InputDecoration(
-  //                   hintText: "Enter delivery address",
-  //                   border: OutlineInputBorder(
-  //                     borderRadius: BorderRadius.circular(10),
-  //                   ),
-  //                 ),
-  //               ),
-  //               const SizedBox(height: 10),
-  //
-  //               // Phone Number Field
-  //               TextField(
-  //                 controller: _phoneController,
-  //                 keyboardType: TextInputType.phone,
-  //                 decoration: InputDecoration(
-  //                   hintText: "Enter your phone number",
-  //                   border: OutlineInputBorder(
-  //                     borderRadius: BorderRadius.circular(10),
-  //                   ),
-  //                 ),
-  //               ),
-  //               const SizedBox(height: 10),
-  //
-  //               // Landmark Field
-  //               TextField(
-  //                 controller: _landmarkController,
-  //                 decoration: InputDecoration(
-  //                   hintText: "Enter nearby landmark",
-  //                   border: OutlineInputBorder(
-  //                     borderRadius: BorderRadius.circular(10),
-  //                   ),
-  //                 ),
-  //               ),
-  //               const SizedBox(height: 20),
-  //
-  //               ElevatedButton(
-  //                 onPressed: () async {
-  //                   if (_addressController.text.isNotEmpty &&
-  //                       _phoneController.text.isNotEmpty) {
-  //                     Navigator.pop(context);
-  //                     initiatePurchase();
-  //                     int userId = 1;
-  //                     String address = _addressController.text;
-  //                     String phoneNumber = _phoneController.text;
-  //                     String landmark = _landmarkController.text;
-  //
-  //                     for (var item in cartItems) {
-  //                       int foodItemId = item['id'];
-  //                       String foodName = item['name'];
-  //                       double price = item['price'];
-  //                       int quantity = 1;
-  //
-  //                       await DatabaseHelper.instance.placeOrder(
-  //                         userId,
-  //                         foodItemId,
-  //                         quantity,
-  //                         price,
-  //                         address,
-  //                         "Cash",
-  //                         foodName,
-  //                         phoneNumber,
-  //                         landmark,
-  //                       );
-  //                     }
-  //
-  //                     setState(
-  //                       () => cartItems.clear(),
-  //                     ); // Clear cart after order
-  //                   }
-  //                 },
-  //                 style: ElevatedButton.styleFrom(
-  //                   backgroundColor: Colors.amber.shade700,
-  //                   padding: const EdgeInsets.symmetric(
-  //                     vertical: 12,
-  //                     horizontal: 20,
-  //                   ),
-  //                 ),
-  //                 child: const Text(
-  //                   "Confirm Address",
-  //                   style: TextStyle(color: Colors.black),
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
 
   Widget _buildCartPage() {
     return Scaffold(
@@ -1111,10 +1244,11 @@ class _UserHomeState extends State<UserHome> {
 
   List<Widget> get _pages => [
     _buildFoodGrid(),       // 0 - Home
-    profilepage(),          // 1 - Profile
-    _buildCartPage(),       // 2 - Cart (FAB)
-    _buildFavoritesPage(),  // 3 - Favorites
-    OrderStatusPage(),      // 4 - Orders
+    _buildFavoritesPage(),
+    _buildCartPage(),
+    profilepage(),
+  // 3 - Favorites
+    OrderStatusPage(),
   ];
 
   @override
@@ -1139,10 +1273,11 @@ class _UserHomeState extends State<UserHome> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildNavItem(Icons.home, 0),           // Home
-              _buildNavItem(Icons.person, 1),        // Profile
+              _buildNavItem(Icons.home, 0),
+              _buildNavItem(Icons.favorite, 1),
+              // Home
               const SizedBox(width: 40),             // Space for FAB
-              _buildNavItem(Icons.favorite, 3),      // Favorites
+              _buildNavItem(Icons.person, 3),        // Profile
               _buildNavItem(Icons.receipt_long, 4),  // Orders
             ],
           ),

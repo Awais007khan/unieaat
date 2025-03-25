@@ -257,6 +257,20 @@ class DatabaseHelper {
       conflictAlgorithm: ConflictAlgorithm.ignore,
     );
   }
+  Future<void> insertFoodItems(List<Map<String, dynamic>> foodList) async {
+    final db = await database;
+    for (var food in foodList) {
+      await db.insert(
+        'food_items',
+        {
+          'name': food['name'],
+          'price': food['price'],
+          'image': food['image'],
+        },
+        conflictAlgorithm: ConflictAlgorithm.ignore,
+      );
+    }
+  }
 
   Future<void> removeFromFavorites(int userId, int foodId) async {
     final db = await database;
