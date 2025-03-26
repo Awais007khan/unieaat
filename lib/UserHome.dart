@@ -33,100 +33,43 @@ class _UserHomeState extends State<UserHome> {
   final TextEditingController searchController = TextEditingController();
   TextEditingController phoneController = TextEditingController();
   TextEditingController addressController = TextEditingController();
+  TextEditingController _phoneController = TextEditingController();
+  TextEditingController _landmarkController = TextEditingController();
+  TextEditingController _addressController =
+  TextEditingController();
+  bool isPhoneValid = true;
+
   List<Map<String, dynamic>> favoriteItems = [];
-  List<Map<String, dynamic>> filteredFoodItems = []; // Filtered list
+  List<Map<String, dynamic>> filteredFoodItems = [];
   @override
   void initState() {
     super.initState();
-    initIAP();
-    _loadFoodItems();
-    _loadUserData();
-    _loadFavoriteItems();
-    addInitialFoodData();
-    filteredFoodItems = List.from(foodItems);
-    FlutterInappPurchase.purchaseUpdated.listen((productItem) async {
-      if (productItem!.transactionStateIOS == TransactionState.purchased) {
-        await showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              backgroundColor: const Color(0xFF122342),
-              title: const Text(
-                'Restart App',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              content: const Text(
-                'You need to restart the app to activate the Pro features.',
-                style: TextStyle(color: Colors.white70),
-              ),
-              shape: RoundedRectangleBorder(
-                // ignore: prefer_const_constructors
-                side: BorderSide(
-                  color: const Color(0xFF00FFFF), // Border color
-                  width: 2.0, // Border width
-                ),
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              actions: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Align(
-                      alignment: Alignment.center,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: const Color(0xFF00FFFF),
-                            width: 2,
-                          ),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.all(5),
-                        child: TextButton(
-                          onPressed: () async {
-                            SystemChannels.platform.invokeMethod(
-                              'SystemNavigator.pop',
-                            );
-                            await Future.delayed(
-                              const Duration(milliseconds: 500),
-                            );
-                            Navigator.of(context).pushAndRemoveUntil(
-                              MaterialPageRoute(
-                                builder: (context) => const LoginScreen(),
-                              ),
-                              (Route<dynamic> route) => false,
-                            );
-                          },
-                          child: const Text(
-                            'Restart Now',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            );
-          },
-        );
-      } else {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
-        );
-      }
-    });
-    FlutterInappPurchase.purchaseError.listen((purchaseError) {
-      print('Purchase Error: $purchaseError');
+    _initializeData();
+    _phoneController.addListener(() {
+      setState(() {
+        isPhoneValid = _phoneController.text.length >= 11;
+      });
+    });// Call async function without awaiting
+  }
+
+  void _initializeData() async {
+    final db = await DatabaseHelper.instance.database;
+    List<Map<String, dynamic>> columns = await db.rawQuery("PRAGMA table_info(food_items);");
+    print(columns);
+    await _loadFoodItems();
+    await _loadUserData();
+    await _loadFavoriteItems();
+    setState(() {
+      filteredFoodItems = List.from(foodItems);
     });
   }
+
+
+
   void addInitialFoodData() async {
     final dbHelper = DatabaseHelper.instance;
+
+    await dbHelper.deleteAllFoodItems(); // ✅ No more error!
 
     await dbHelper.insertFoodItems(burgerList);
     await dbHelper.insertFoodItems(pizzaList);
@@ -135,171 +78,172 @@ class _UserHomeState extends State<UserHome> {
     await dbHelper.insertFoodItems(vegetableList);
     await dbHelper.insertFoodItems(dessertList);
 
-
     print("Food items inserted successfully!");
   }
-
+  List<Map<String, dynamic>> burgerList = [
+    {
+      "name": "Burger Bistro",
+      "restaurant": "Rose Garden",
+      "price": 40,
+      "image": "assets/burger_bistro.png",
+    },
+    {
+      "name": "Smokin' Burger",
+      "restaurant": "Cafenio Restaurant",
+      "price": 60,
+      "image": "assets/smokin_burger.png",
+    },
+    {
+      "name": "Buffalo Burgers",
+      "restaurant": "Kaji Firm Kitchen",
+      "price": 75,
+      "image": "assets/buffalo_burger.png",
+    },
+    {
+      "name": "Bullseye Burgers",
+      "restaurant": "Kabab Restaurant",
+      "price": 94,
+      "image": "assets/bullseye_burger.png",
+    },
+  ];
+  List<Map<String, dynamic>> pizzaList = [
+    {
+      "name": "Cheese Lovers",
+      "restaurant": "Pizza Hut",
+      "price": 30,
+      "image": "assets/cheese_lovers.png",
+    },
+    {
+      "name": "Pepperoni Feast",
+      "restaurant": "Dominos",
+      "price": 45,
+      "image": "assets/pepperoni_pizza.png",
+    },
+    {
+      "name": "BBQ Chicken Pizza",
+      "restaurant": "Papa Johns",
+      "price": 50,
+      "image": "assets/bbq_chicken_pizza.png",
+    },
+    {
+      "name": "Veggie Delight",
+      "restaurant": "Local Pizzeria",
+      "price": 35,
+      "image": "assets/veggie_pizza.png",
+    },
+  ];
+  List<Map<String, dynamic>> noodlesList = [
+    {
+      "name": "Spicy Chicken Noodles",
+      "restaurant": "Asian Bites",
+      "price": 50,
+      "image": "assets/Noodles_1.png",
+    },
+    {
+      "name": "Garlic Butter Noodles",
+      "restaurant": "Noodle House",
+      "price": 40,
+      "image": "assets/Noodles_2.png",
+    },
+    {
+      "name": "Schezwan Noodles",
+      "restaurant": "Dragon Wok",
+      "price": 55,
+      "image": "assets/Noodles_3.png",
+    },
+    {
+      "name": "Veggie Stir-Fry Noodles",
+      "restaurant": "Green Kitchen",
+      "price": 45,
+      "image": "assets/Noodles_4.png",
+    },
+  ];
+  List<Map<String, dynamic>> meatList = [
+    {
+      "name": "Grilled Steak",
+      "restaurant": "Steak House",
+      "price": 120,
+      "image": "assets/meat_1.png",
+    },
+    {
+      "name": "BBQ Ribs",
+      "restaurant": "Smokehouse Grill",
+      "price": 150,
+      "image": "assets/meat_2.png",
+    },
+    {
+      "name": "Lamb Chops",
+      "restaurant": "Mediterranean Delight",
+      "price": 180,
+      "image": "assets/meat_3.png",
+    },
+    {
+      "name": "Tandoori Chicken",
+      "restaurant": "Spicy Corner",
+      "price": 100,
+      "image": "assets/meat_4.png",
+    },
+  ];
+  List<Map<String, dynamic>> vegetableList = [
+    {
+      "name": "Fresh Salad",
+      "restaurant": "Healthy Bites",
+      "price": 30,
+      "image": "assets/vegetable_1.png",
+    },
+    {
+      "name": "Grilled Veggies",
+      "restaurant": "Green Delight",
+      "price": 40,
+      "image": "assets/vegetable_2.png",
+    },
+    {
+      "name": "Mixed Stir-Fry",
+      "restaurant": "Veggie Heaven",
+      "price": 35,
+      "image": "assets/vegetable_3.png",
+    },
+    {
+      "name": "Broccoli & Carrot Mix",
+      "restaurant": "Organic Kitchen",
+      "price": 45,
+      "image": "assets/vegetable_4.png",
+    },
+  ];
+  List<Map<String, dynamic>> dessertList = [
+    {
+      "name": "Chocolate Cake",
+      "restaurant": "Sweet Treats",
+      "price": 50,
+      "image": "assets/dessert_1.png",
+    },
+    {
+      "name": "Ice Cream Sundae",
+      "restaurant": "Frosty Delights",
+      "price": 40,
+      "image": "assets/dessert_2.png",
+    },
+    {
+      "name": "Strawberry Cheesecake",
+      "restaurant": "Cheese Heaven",
+      "price": 55,
+      "image": "assets/dessert_3.png",
+    },
+    {
+      "name": "Brownie with Ice Cream",
+      "restaurant": "Chocolate House",
+      "price": 45,
+      "image": "assets/dessert_4.png",
+    },
+  ];
   Future<void> _loadFoodItems() async {
-    final items = await DatabaseHelper.instance.getFoodItems();
-    print("Loaded Food Items: $items");
+    final item = await DatabaseHelper.instance.getFoodItems();
+    print("Loaded Food Items: $item");
+
     setState(() {
-      foodItems = items;
+      foodItems = item;
     });
   }
-void showPaymentBottomSheet(BuildContext context) {
-  showModalBottomSheet(
-    context: context,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
-    ),
-    builder: (context) {
-      return Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Card information",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                Icon(Icons.photo_camera),
-              ],
-            ),
-            SizedBox(height: 8),
-            TextField(
-              decoration: InputDecoration(
-                labelText: "Card number",
-                border: OutlineInputBorder(),
-                suffixIcon: Icon(Icons.credit_card),
-              ),
-              keyboardType: TextInputType.number,
-            ),
-            SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(
-                      labelText: "MM / YY",
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                ),
-                SizedBox(width: 10),
-                Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(
-                      labelText: "CVC",
-                      border: OutlineInputBorder(),
-                      suffixIcon: Icon(Icons.lock),
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 10),
-            DropdownButtonFormField<String>(
-              decoration: InputDecoration(
-                labelText: "Country or region",
-                border: OutlineInputBorder(),
-              ),
-              items: [DropdownMenuItem(child: Text("United States"), value: "US")],
-              onChanged: (value) {},
-            ),
-            SizedBox(height: 10),
-            TextField(
-              decoration: InputDecoration(
-                labelText: "ZIP",
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.number,
-            ),
-            SizedBox(height: 10),
-            Row(
-              children: [
-                Checkbox(value: true, onChanged: (value) {}),
-                Text("Save this card for future payments"),
-              ],
-            ),
-            SizedBox(height: 10),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {},
-                icon: Icon(Icons.lock),
-                label: Text("Pay €90.00"),
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 12),
-                  backgroundColor: Colors.blue,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    },
-  );
-}
-
-
-  Future<void> initIAP() async {
-    try {
-      final status = await FlutterInappPurchase.instance.initialize();
-      print('IAP initialized successfully.');
-
-      List<IAPItem> items = await FlutterInappPurchase.instance.getProducts([
-        'android.test.purchased',
-      ]);
-      print("items");
-      if (items.isNotEmpty &&
-          items[0].price != null &&
-          items[0].currency != null) {
-        setState(() {});
-      }
-    } catch (error) {
-      print('Error initializing IAP: $error');
-    }
-  }
-
-  Future<void> initiatePurchase() async {
-    try {
-      await initIAP();
-
-      List<String> productIds = ['android.test.purchased'];
-
-      for (var productId in productIds) {
-        List<IAPItem> items = await FlutterInappPurchase.instance.getProducts([
-          productId,
-        ]);
-        print(items);
-
-        print('Number of products for $productId: ${items.length}');
-        for (var item in items) {
-          print('Product ID: ${item.productId}');
-          print('Title: ${item.title}');
-          print('Description: ${item.description}');
-          print('Price: ${item.price}');
-        }
-
-        if (items.isNotEmpty && items[0].productId != null) {
-          await FlutterInappPurchase.instance.requestPurchase(
-            items[0].productId!,
-          );
-        } else {
-          print('Product ID is null or empty for $productId.');
-        }
-      }
-    } catch (error) {
-      print('Error purchasing: $error');
-    }
-  }
-
   Future<void> _loadUserData() async {
     int userId = 1; // Replace this with actual logged-in user ID
     final user = await DatabaseHelper.instance.getUserById(userId);
@@ -317,13 +261,11 @@ void showPaymentBottomSheet(BuildContext context) {
       print("User not found in database!");
     }
   }
-
   Future<void> _loadFavoriteItems() async {
     int userId = 1; // Replace with actual logged-in user ID
-    final items = await DatabaseHelper.instance.getFavoriteItems(userId);
-    setState(() => favoriteItems = items);
+    final item = await DatabaseHelper.instance.getFavoriteItems(userId);
+    setState(() => favoriteItems = item);
   }
-
   Future<void> _toggleFavorite(Map<String, dynamic> item) async {
     int userId = 1; // Replace with actual user ID
     bool isFav = favoriteItems.any((fav) => fav['id'] == item['id']);
@@ -336,13 +278,11 @@ void showPaymentBottomSheet(BuildContext context) {
 
     _loadFavoriteItems();
   }
-
   List<Map<String, dynamic>> food = [
     {"id": 1, "name": "Burger"},
     {"id": 2, "name": "Pizza"},
     {"id": 3, "name": "Pasta"},
   ];
-
   void _filterFoods(String query) {
     setState(() {
       filteredFoodItems =
@@ -354,8 +294,6 @@ void showPaymentBottomSheet(BuildContext context) {
               .toList();
     });
   }
-
-
   Widget _buildFoodSlider() {
     final List<Widget> banners = [
       _buildBanner(
@@ -389,13 +327,13 @@ void showPaymentBottomSheet(BuildContext context) {
       items: banners,
     );
   }
-
   Widget _buildBanner(
     String title,
     String subtitle,
     String imagePath,
     Color bgColor,
-  ) {
+  )
+  {
     return Container(
       margin: const EdgeInsets.all(12),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
@@ -437,212 +375,57 @@ void showPaymentBottomSheet(BuildContext context) {
       ),
     );
   }
-    List<Map<String, dynamic>> burgerList = [
-      {
-        "name": "Burger Bistro",
-        "restaurant": "Rose Garden",
-        "price": 40,
-        "image": "assets/burger_bistro.png"
-      },
-      {
-        "name": "Smokin' Burger",
-        "restaurant": "Cafenio Restaurant",
-        "price": 60,
-        "image": "assets/smokin_burger.png"
-      },
-      {
-        "name": "Buffalo Burgers",
-        "restaurant": "Kaji Firm Kitchen",
-        "price": 75,
-        "image": "assets/buffalo_burger.png"
-      },
-      {
-        "name": "Bullseye Burgers",
-        "restaurant": "Kabab Restaurant",
-        "price": 94,
-        "image": "assets/bullseye_burger.png"
-      }
-    ];
-    List<Map<String, dynamic>> pizzaList = [
-      {
-        "name": "Cheese Lovers",
-        "restaurant": "Pizza Hut",
-        "price": 30,
-        "image": "assets/cheese_lovers.png"
-      },
-      {
-        "name": "Pepperoni Feast",
-        "restaurant": "Dominos",
-        "price": 45,
-        "image": "assets/pepperoni_pizza.png"
-      },
-      {
-        "name": "BBQ Chicken Pizza",
-        "restaurant": "Papa Johns",
-        "price": 50,
-        "image": "assets/bbq_chicken_pizza.png"
-      },
-      {
-        "name": "Veggie Delight",
-        "restaurant": "Local Pizzeria",
-        "price": 35,
-        "image": "assets/veggie_pizza.png"
-      }
-    ];
-  List<Map<String, dynamic>> noodlesList = [
-    {
-      "name": "Spicy Chicken Noodles",
-      "restaurant": "Asian Bites",
-      "price": 50,
-      "image": "assets/Noodles_1.png"
-    },
-    {
-      "name": "Garlic Butter Noodles",
-      "restaurant": "Noodle House",
-      "price": 40,
-      "image": "assets/Noodles_2.png"
-    },
-    {
-      "name": "Schezwan Noodles",
-      "restaurant": "Dragon Wok",
-      "price": 55,
-      "image": "assets/Noodles_3.png"
-    },
-    {
-      "name": "Veggie Stir-Fry Noodles",
-      "restaurant": "Green Kitchen",
-      "price": 45,
-      "image": "assets/Noodles_4.png"
-    }
-  ];
-  List<Map<String, dynamic>> meatList = [
-    {
-      "name": "Grilled Steak",
-      "restaurant": "Steak House",
-      "price": 120,
-      "image": "assets/meat_1.png"
-    },
-    {
-      "name": "BBQ Ribs",
-      "restaurant": "Smokehouse Grill",
-      "price": 150,
-      "image": "assets/meat_2.png"
-    },
-    {
-      "name": "Lamb Chops",
-      "restaurant": "Mediterranean Delight",
-      "price": 180,
-      "image": "assets/meat_3.png"
-    },
-    {
-      "name": "Tandoori Chicken",
-      "restaurant": "Spicy Corner",
-      "price": 100,
-      "image": "assets/meat_4.png"
-    }
-  ];
-  List<Map<String, dynamic>> vegetableList = [
-    {
-      "name": "Fresh Salad",
-      "restaurant": "Healthy Bites",
-      "price": 30,
-      "image": "assets/vegetable_1.png"
-    },
-    {
-      "name": "Grilled Veggies",
-      "restaurant": "Green Delight",
-      "price": 40,
-      "image": "assets/vegetable_2.png"
-    },
-    {
-      "name": "Mixed Stir-Fry",
-      "restaurant": "Veggie Heaven",
-      "price": 35,
-      "image": "assets/vegetable_3.png"
-    },
-    {
-      "name": "Broccoli & Carrot Mix",
-      "restaurant": "Organic Kitchen",
-      "price": 45,
-      "image": "assets/vegetable_4.png"
-    }
-  ];
-  List<Map<String, dynamic>> dessertList = [
-    {
-      "name": "Chocolate Cake",
-      "restaurant": "Sweet Treats",
-      "price": 50,
-      "image": "assets/dessert_1.png"
-    },
-    {
-      "name": "Ice Cream Sundae",
-      "restaurant": "Frosty Delights",
-      "price": 40,
-      "image": "assets/dessert_2.png"
-    },
-    {
-      "name": "Strawberry Cheesecake",
-      "restaurant": "Cheese Heaven",
-      "price": 55,
-      "image": "assets/dessert_3.png"
-    },
-    {
-      "name": "Brownie with Ice Cream",
-      "restaurant": "Chocolate House",
-      "price": 45,
-      "image": "assets/dessert_4.png"
-    }
-  ];
+
+
 
   Widget _buildFoodItem(void Function(String) onCategorySelected) {
-      final List<Map<String, String>> categories = [
-        {"icon": "🍔", "label": "Hamburger"},
-        {"icon": "🍕", "label": "Pizza"},
-        {"icon": "🍜", "label": "Noodles"},
-        {"icon": "🍖", "label": "Meat"},
-        {"icon": "🥬", "label": "Vegetables"},
-        {"icon": "🍰", "label": "Dessert"},
+    final List<Map<String, String>> categories = [
+      {"icon": "🍔", "label": "Hamburger"},
+      {"icon": "🍕", "label": "Pizza"},
+      {"icon": "🍜", "label": "Noodles"},
+      {"icon": "🍖", "label": "Meat"},
+      {"icon": "🥬", "label": "Vegetables"},
+      {"icon": "🍰", "label": "Dessert"},
+    ];
 
-      ];
-
-      return GridView.builder(
-        shrinkWrap: true,
-        physics: NeverScrollableScrollPhysics(),
-        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
-          childAspectRatio: 1,
-        ),
-        itemCount: categories.length,
-        itemBuilder: (context, index) {
-          final category = categories[index];
-          return GestureDetector(
-            onTap: () => onCategorySelected(category["label"]!), // Call function when tapped
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  category["icon"]!,
-                  style: TextStyle(fontSize: 40),
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        childAspectRatio: 1,
+      ),
+      itemCount: categories.length,
+      itemBuilder: (context, index) {
+        final category = categories[index];
+        return GestureDetector(
+          onTap:
+              () => onCategorySelected(
+                category["label"]!,
+              ), // Call function when tapped
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(category["icon"]!, style: TextStyle(fontSize: 40)),
+              SizedBox(height: 5),
+              Text(
+                category["label"]!,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black87,
                 ),
-                SizedBox(height: 5),
-                Text(
-                  category["label"]!,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black87,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          );
-        },
-      );
-    }
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   Widget _buildFoodGrid() {
     List<Map<String, dynamic>> displayList = [];
@@ -651,24 +434,23 @@ void showPaymentBottomSheet(BuildContext context) {
       displayList = burgerList;
     } else if (selectedCategory == "Pizza") {
       displayList = pizzaList;
-    }else if (selectedCategory == "Noodles") {
-    displayList = noodlesList;
+    } else if (selectedCategory == "Noodles") {
+      displayList = noodlesList;
     } else if (selectedCategory == "Meat") {
       displayList = meatList;
     } else if (selectedCategory == "Vegetables") {
       displayList = vegetableList;
     } else if (selectedCategory == "Dessert") {
       displayList = dessertList;
-    }
-
-    else{
+    } else {
       displayList = foodItems;
     }
 
     return Column(
       children: [
         Expanded(
-          child: SingleChildScrollView(  // 🔹 Wrap Column with SingleChildScrollView
+          child: SingleChildScrollView(
+            // 🔹 Wrap Column with SingleChildScrollView
             child: Column(
               children: [
                 SizedBox(height: 20),
@@ -694,8 +476,10 @@ void showPaymentBottomSheet(BuildContext context) {
                 }),
                 SizedBox(height: 10), // Extra spacing to prevent tight layout
                 GridView.builder(
-                  shrinkWrap: true, // 🔹 Important: GridView ko wrap content banata hai
-                  physics: NeverScrollableScrollPhysics(), // 🔹 Scrolling prevent karega (kyunki parent scrollable hai)
+                  shrinkWrap:
+                      true, // 🔹 Important: GridView ko wrap content banata hai
+                  physics:
+                      NeverScrollableScrollPhysics(), // 🔹 Scrolling prevent karega (kyunki parent scrollable hai)
                   padding: const EdgeInsets.all(12.0),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
@@ -707,7 +491,7 @@ void showPaymentBottomSheet(BuildContext context) {
                   itemBuilder: (context, index) {
                     final item = displayList[index];
                     bool isFavorite = favoriteItems.any(
-                          (fav) => fav['name'] == item['name'],
+                      (fav) => fav['name'] == item['name'],
                     );
                     return _buildFoodCard(item, isFavorite);
                   },
@@ -718,14 +502,12 @@ void showPaymentBottomSheet(BuildContext context) {
         ),
       ],
     );
-
-
-
-
   }
 
-
   Widget _buildFoodCard(Map<String, dynamic> item, bool isFavorite) {
+    print("Image URL: ${item['image']}");
+    print("Checking Image Path: ${item['image']}");
+    print("File Exists: ${File(item['image']).existsSync()}");
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       elevation: 3,
@@ -739,23 +521,24 @@ void showPaymentBottomSheet(BuildContext context) {
               Stack(
                 children: [
                   GestureDetector(
-
-                    child: ClipRRect(
+                    child:
+                    ClipRRect(
                       borderRadius: BorderRadius.circular(12),
-                      child: item['image'] != null && File(item['image']).existsSync()
-                          ? Image.file(
-                        File(item['image']),
+                      child: item['image'] != null && item['image'].startsWith('assets/')
+                          ? Image.asset(
+                        item['image'], // Directly use Image.asset for assets folder
                         width: double.infinity,
                         height: 100,
                         fit: BoxFit.cover,
                       )
-                          : Image.asset(
-                        'assets/burger.png',
+                          : Image.file(
+                        File(item['image']), // Only use File() for local storage paths
                         width: double.infinity,
                         height: 100,
-                        fit: BoxFit.contain,
+                        fit: BoxFit.cover,
                       ),
                     ),
+
                   ),
                   Positioned(
                     top: 8,
@@ -857,14 +640,19 @@ void showPaymentBottomSheet(BuildContext context) {
                 children: [
                   Expanded(
                     child:
-                        item['image'] != null &&
-                                File(item['image']).existsSync()
-                            ? Image.file(File(item['image']), fit: BoxFit.cover)
-                            : const Icon(
-                              Icons.fastfood,
-                              size: 50,
-                              color: Colors.brown,
-                            ),
+                    item['image'] != null && item['image'].startsWith('assets/')
+                        ? Image.asset(
+                      item['image'], // Directly use Image.asset for assets folder
+                      width: double.infinity,
+                      height: 100,
+                      fit: BoxFit.cover,
+                    )
+                        : Image.file(
+                      File(item['image']), // Only use File() for local storage paths
+                      width: double.infinity,
+                      height: 100,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(10.0),
@@ -930,19 +718,132 @@ void showPaymentBottomSheet(BuildContext context) {
     String address,
   ) async {
     final db = await DatabaseHelper.instance.database;
-    await db.insert('orders', {
+    await db.insert('orders',
+        {
       'userId': userId,
       'foodItemId': foodItemId,
       'quantity': quantity,
       'totalPrice': price,
       'address': address, // Manually entered address
       'status': 'Processing',
-    }, conflictAlgorithm: ConflictAlgorithm.replace);
+    },
+        conflictAlgorithm: ConflictAlgorithm.replace);
   }
+
+  Future<void> showPaymentBottomSheet(BuildContext context) async {
+    double totalPrice = cartItems.fold(
+      0,
+      (sum, item) => sum + item['price'],
+    ); // Calculate total price
+
+    return showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Card information",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const Icon(Icons.photo_camera),
+                ],
+              ),
+              const SizedBox(height: 8),
+              const TextField(
+                decoration: InputDecoration(
+                  labelText: "Card number",
+                  border: OutlineInputBorder(),
+                  suffixIcon: Icon(Icons.credit_card),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: const TextField(
+                      decoration: InputDecoration(
+                        labelText: "MM / YY",
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: const TextField(
+                      decoration: InputDecoration(
+                        labelText: "CVC",
+                        border: OutlineInputBorder(),
+                        suffixIcon: Icon(Icons.lock),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              DropdownButtonFormField<String>(
+                decoration: const InputDecoration(
+                  labelText: "Country or region",
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem(child: Text("United States"), value: "US"),
+                ],
+                onChanged: (value) {},
+              ),
+              const SizedBox(height: 10),
+              const TextField(
+                decoration: InputDecoration(
+                  labelText: "ZIP",
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Checkbox(value: true, onChanged: (value) {}),
+                  const Text("Save this card for future payments"),
+                ],
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context); // Close modal on payment
+                  },
+                  icon: const Icon(Icons.lock),
+                  label: Text(
+                    "Pay PKR ${totalPrice.toStringAsFixed(2)}",
+                  ), // Dynamic price
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    backgroundColor: Colors.blue,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   void _showAddressBottomSheet() {
-    TextEditingController _phoneController = TextEditingController();
-    TextEditingController _landmarkController = TextEditingController();
-    TextEditingController _addressController = TextEditingController(); // Address controller
+// Address controller
 
     Future<void> _getCurrentLocation() async {
       bool serviceEnabled;
@@ -963,7 +864,8 @@ void showPaymentBottomSheet(BuildContext context) {
       }
 
       Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
+        desiredAccuracy: LocationAccuracy.high,
+      );
 
       try {
         List<Placemark> placemarks = await placemarkFromCoordinates(
@@ -1040,6 +942,9 @@ void showPaymentBottomSheet(BuildContext context) {
                     hintText: "Enter your phone number",
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: isPhoneValid ? Colors.grey : Colors.red, // Red border if invalid
+                      ),
                     ),
                   ),
                 ),
@@ -1061,33 +966,70 @@ void showPaymentBottomSheet(BuildContext context) {
                   onPressed: () async {
                     if (_addressController.text.isNotEmpty &&
                         _phoneController.text.isNotEmpty) {
-                      Navigator.pop(context);
-                      initiatePurchase();
-                      int userId = 1;
-                      String address = _addressController.text;
-                      String phoneNumber = _phoneController.text;
-                      String landmark = _landmarkController.text;
 
-                      for (var item in cartItems) {
-                        int foodItemId = item['id'];
-                        String foodName = item['name'];
-                        double price = item['price'];
-                        int quantity = 1;
+                      String? paymentMethod = await showDialog<String>(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text("Choose Payment Method"),
+                            content: const Text("How would you like to pay?"),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, "Cash"),
+                                child: const Text("Cash on Delivery"),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, "Online"),
+                                child: const Text("Online Payment"),
+                              ),
+                            ],
+                          );
+                        },
+                      );
 
-                        await DatabaseHelper.instance.placeOrder(
-                          userId,
-                          foodItemId,
-                          quantity,
-                          price,
-                          address,
-                          "Cash",
-                          foodName,
-                          phoneNumber,
-                          landmark,
+                      if (paymentMethod != null) {
+                        if (mounted) {
+                          Navigator.pop(context);
+                        }
+
+                        int userId = 1;
+                        String address = _addressController.text;
+                        String phoneNumber = _phoneController.text;
+                        String landmark = _landmarkController.text;
+
+                        if (paymentMethod == "Online") {
+                          await showPaymentBottomSheet(context);
+                        }
+
+                        for (var item in cartItems) {
+                          int foodItemId = item['id'] ?? 0;
+                          String foodName = item['name'];
+                          double price = (item['price'] as num?)?.toDouble() ?? 0.0;
+                          int quantity = 1;
+
+                          await DatabaseHelper.instance.placeOrder(
+                            userId,
+                            foodItemId,
+                            quantity,
+                            price,
+                            address,
+                            paymentMethod,
+                            foodName,
+                            phoneNumber,
+                            landmark,
+                          );
+                        }
+
+                        debugPrint(
+                            paymentMethod == "Cash"
+                                ? "Cash on Delivery order confirmed!"
+                                : "Online payment order confirmed!"
                         );
-                      }
 
-                      setState(() => cartItems.clear()); // Clear cart after order
+                        if (mounted) {
+                          setState(() => cartItems.clear());
+                        }
+                      }
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -1102,6 +1044,7 @@ void showPaymentBottomSheet(BuildContext context) {
                     style: TextStyle(color: Colors.black),
                   ),
                 ),
+
               ],
             ),
           ),
@@ -1116,75 +1059,93 @@ void showPaymentBottomSheet(BuildContext context) {
       body: Column(
         children: [
           Expanded(
-            child: cartItems.isEmpty
-                ? const Center(
-              child: Text(
-                "Cart is empty",
-                style: TextStyle(fontSize: 18),
-              ),
-            )
-                : ListView.builder(
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-              itemCount: cartItems.length,
-              itemBuilder: (context, index) {
-                final item = cartItems[index];
-                return Card(
-                  elevation: 3, // Soft shadow effect
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.all(12),
-                    leading: ClipRRect(
-                      borderRadius: BorderRadius.circular(10), // Rounded image
-                      child: Image.network(
-                        item['image'], // Fetch image from the item
-                        width: 55,
-                        height: 55,
-                        fit: BoxFit.cover, // Ensure the image fits well
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Icon(Icons.fastfood, size: 40, color: Colors.brown);
-                        },
+            child:
+                cartItems.isEmpty
+                    ? const Center(
+                      child: Text(
+                        "Cart is empty",
+                        style: TextStyle(fontSize: 18),
                       ),
-                    ),
-                    title: Text(
-                      item['name'],
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                    )
+                    : ListView.builder(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 10,
                       ),
-                    ),
-                    subtitle: Text(
-                      "PKR ${item['price']}",
-                      style: GoogleFonts.poppins(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.green.shade700,
-                      ),
-                    ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.remove_circle, color: Colors.red),
-                      onPressed: () {
-                        setState(() => cartItems.removeAt(index));
+                      itemCount: cartItems.length,
+                      itemBuilder: (context, index) {
+                        final item = cartItems[index];
+                        return Card(
+                          elevation: 3, // Soft shadow effect
+                          margin: const EdgeInsets.symmetric(vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.all(12),
+                            leading: ClipRRect(
+                              borderRadius: BorderRadius.circular(
+                                10,
+                              ), // Rounded image
+                              child: Image.network(
+                                item['image'], // Fetch image from the item
+                                width: 55,
+                                height: 55,
+                                fit: BoxFit.cover, // Ensure the image fits well
+                                errorBuilder: (context, error, stackTrace) {
+                                  return const Icon(
+                                    Icons.fastfood,
+                                    size: 40,
+                                    color: Colors.brown,
+                                  );
+                                },
+                              ),
+                            ),
+                            title: Text(
+                              item['name'],
+                              style: GoogleFonts.poppins(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            subtitle: Text(
+                              "PKR ${item['price']}",
+                              style: GoogleFonts.poppins(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.green.shade700,
+                              ),
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(
+                                Icons.remove_circle,
+                                color: Colors.red,
+                              ),
+                              onPressed: () {
+                                setState(() => cartItems.removeAt(index));
+                              },
+                            ),
+                          ),
+                        );
                       },
                     ),
-                  ),
-                );
-              },
-            ),
           ),
 
           // Move Order Button Upwards
           const SizedBox(height: 10),
 
           Container(
-            padding: const EdgeInsets.symmetric(vertical: 30), // Move button upwards
+            padding: const EdgeInsets.symmetric(
+              vertical: 30,
+            ), // Move button upwards
             child: ElevatedButton(
               onPressed: cartItems.isEmpty ? null : _showAddressBottomSheet,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.amber.shade700,
-                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 50),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 14,
+                  horizontal: 50,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -1203,8 +1164,6 @@ void showPaymentBottomSheet(BuildContext context) {
       ),
     );
   }
-
-
 
   Widget profilepage() {
     return Scaffold(
@@ -1231,7 +1190,11 @@ void showPaymentBottomSheet(BuildContext context) {
                 CircleAvatar(
                   radius: 20,
                   backgroundColor: Colors.blue.shade100,
-                  child: Icon(Icons.person, size: 24, color: Colors.blue), // Adjusted size
+                  child: Icon(
+                    Icons.person,
+                    size: 24,
+                    color: Colors.blue,
+                  ), // Adjusted size
                 ),
 
                 const SizedBox(height: 10),
@@ -1296,8 +1259,7 @@ void showPaymentBottomSheet(BuildContext context) {
   ) {
     return ListTile(
       leading: Icon(icon, color: Colors.blue),
-      title:
-   Text(
+      title: Text(
         value,
         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
       ),
@@ -1310,12 +1272,14 @@ void showPaymentBottomSheet(BuildContext context) {
     );
   }
 
-
-  void _showEditDialog(String title, String currentValue, Function(String) onSave,
-  ) {TextEditingController controller = TextEditingController(
+  void _showEditDialog(
+    String title,
+    String currentValue,
+    Function(String) onSave,
+  ) {
+    TextEditingController controller = TextEditingController(
       text: currentValue,
     );
-
     showDialog(
       context: context,
       builder: (context) {
@@ -1344,11 +1308,11 @@ void showPaymentBottomSheet(BuildContext context) {
   }
 
   List<Widget> get _pages => [
-    _buildFoodGrid(),       // 0 - Home
+    _buildFoodGrid(), // 0 - Home
     _buildFavoritesPage(),
     _buildCartPage(),
     profilepage(),
-  // 3 - Favorites
+    // 3 - Favorites
     OrderStatusPage(),
   ];
 
@@ -1377,9 +1341,9 @@ void showPaymentBottomSheet(BuildContext context) {
               _buildNavItem(Icons.home, 0),
               _buildNavItem(Icons.favorite, 1),
               // Home
-              const SizedBox(width: 40),             // Space for FAB
-              _buildNavItem(Icons.person, 3),        // Profile
-              _buildNavItem(Icons.receipt_long, 4),  // Orders
+              const SizedBox(width: 40), // Space for FAB
+              _buildNavItem(Icons.person, 3), // Profile
+              _buildNavItem(Icons.receipt_long, 4), // Orders
             ],
           ),
         ),
@@ -1414,5 +1378,4 @@ void showPaymentBottomSheet(BuildContext context) {
       ),
     );
   }
-
 }

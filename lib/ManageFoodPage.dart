@@ -234,7 +234,19 @@
                     leading: item['image'] != null && File(item['image']).existsSync()
                         ? ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.file(File(item['image']), width: 50, height: 50, fit: BoxFit.cover),
+                      child: item['image'].startsWith('assets/')
+                          ? Image.asset(
+                        item['image'],
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
+                      )
+                          : Image.file(
+                        File(item['image']),
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
+                      ),
                     )
                         : const Icon(Icons.fastfood, size: 50, color: Colors.amber),
                     title: Text(
@@ -263,6 +275,7 @@
               },
             ),
           ),
+
         ),
       );
     }

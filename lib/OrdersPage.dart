@@ -36,6 +36,7 @@ class _OrdersPageState extends State<OrdersPage> {
     final db = await DatabaseHelper.instance.database;
     final orders = await db.query('orders');
     print("Debug Orders from DB: $orders");
+
   }
 
 
@@ -47,6 +48,7 @@ class _OrdersPageState extends State<OrdersPage> {
 
   @override
   Widget build(BuildContext context) {
+
     return Theme(
       data: ThemeData(
         primarySwatch: Colors.amber,
@@ -56,7 +58,7 @@ class _OrdersPageState extends State<OrdersPage> {
       ),
       child: Scaffold(
           body: Padding(
-              padding: const EdgeInsets.only(top: 16),  // Added top padding
+              padding: const EdgeInsets.only(top: 16),
               child:
          isLoading
             ? const Center(child: CircularProgressIndicator(color: Colors.amber))
