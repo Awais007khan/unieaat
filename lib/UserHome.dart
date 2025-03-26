@@ -159,15 +159,22 @@ void showPaymentBottomSheet(BuildContext context) {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Pay \$97.42 using",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Card information",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                Icon(Icons.photo_camera),
+              ],
             ),
-            SizedBox(height: 16),
+            SizedBox(height: 8),
             TextField(
               decoration: InputDecoration(
                 labelText: "Card number",
                 border: OutlineInputBorder(),
+                suffixIcon: Icon(Icons.credit_card),
               ),
               keyboardType: TextInputType.number,
             ),
@@ -189,6 +196,7 @@ void showPaymentBottomSheet(BuildContext context) {
                     decoration: InputDecoration(
                       labelText: "CVC",
                       border: OutlineInputBorder(),
+                      suffixIcon: Icon(Icons.lock),
                     ),
                     keyboardType: TextInputType.number,
                   ),
@@ -216,18 +224,20 @@ void showPaymentBottomSheet(BuildContext context) {
             Row(
               children: [
                 Checkbox(value: true, onChanged: (value) {}),
-                Text("Save card for future payments"),
+                Text("Save this card for future payments"),
               ],
             ),
             SizedBox(height: 10),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
+              child: ElevatedButton.icon(
                 onPressed: () {},
+                icon: Icon(Icons.lock),
+                label: Text("Pay €90.00"),
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.symmetric(vertical: 12),
+                  backgroundColor: Colors.blue,
                 ),
-                child: Text("Pay \$97.42"),
               ),
             ),
           ],
@@ -236,6 +246,7 @@ void showPaymentBottomSheet(BuildContext context) {
     },
   );
 }
+
 
   Future<void> initIAP() async {
     try {
