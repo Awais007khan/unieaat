@@ -341,25 +341,25 @@ class _UserHomeState extends State<UserHome> {
         "name": "Burger Bistro",
         "restaurant": "Rose Garden",
         "price": 40,
-        "image": "assets/images/burger_bistro.png"
+        "image": "assets/burger_bistro.png"
       },
       {
         "name": "Smokin' Burger",
         "restaurant": "Cafenio Restaurant",
         "price": 60,
-        "image": "assets/images/smokin_burger.png"
+        "image": "assets/smokin_burger.png"
       },
       {
         "name": "Buffalo Burgers",
         "restaurant": "Kaji Firm Kitchen",
         "price": 75,
-        "image": "assets/images/buffalo_burger.png"
+        "image": "assets/buffalo_burger.png"
       },
       {
         "name": "Bullseye Burgers",
         "restaurant": "Kabab Restaurant",
         "price": 94,
-        "image": "assets/images/bullseye_burger.png"
+        "image": "assets/bullseye_burger.png"
       }
     ];
     List<Map<String, dynamic>> pizzaList = [
@@ -367,25 +367,25 @@ class _UserHomeState extends State<UserHome> {
         "name": "Cheese Lovers",
         "restaurant": "Pizza Hut",
         "price": 30,
-        "image": "assets/images/cheese_lovers.png"
+        "image": "assets/cheese_lovers.png"
       },
       {
         "name": "Pepperoni Feast",
         "restaurant": "Dominos",
         "price": 45,
-        "image": "assets/images/pepperoni_pizza.png"
+        "image": "assets/pepperoni_pizza.png"
       },
       {
         "name": "BBQ Chicken Pizza",
         "restaurant": "Papa Johns",
         "price": 50,
-        "image": "assets/images/bbq_chicken_pizza.png"
+        "image": "assets/bbq_chicken_pizza.png"
       },
       {
         "name": "Veggie Delight",
         "restaurant": "Local Pizzeria",
         "price": 35,
-        "image": "assets/images/veggie_pizza.png"
+        "image": "assets/veggie_pizza.png"
       }
     ];
   List<Map<String, dynamic>> noodlesList = [
@@ -393,25 +393,25 @@ class _UserHomeState extends State<UserHome> {
       "name": "Spicy Chicken Noodles",
       "restaurant": "Asian Bites",
       "price": 50,
-      "image": "assets/images/Noodles_1.png"
+      "image": "assets/Noodles_1.png"
     },
     {
       "name": "Garlic Butter Noodles",
       "restaurant": "Noodle House",
       "price": 40,
-      "image": "assets/images/Noodles_2.png"
+      "image": "assets/Noodles_2.png"
     },
     {
       "name": "Schezwan Noodles",
       "restaurant": "Dragon Wok",
       "price": 55,
-      "image": "assets/images/Noodles_3.png"
+      "image": "assets/Noodles_3.png"
     },
     {
       "name": "Veggie Stir-Fry Noodles",
       "restaurant": "Green Kitchen",
       "price": 45,
-      "image": "assets/images/Noodles_4.png"
+      "image": "assets/Noodles_4.png"
     }
   ];
   List<Map<String, dynamic>> meatList = [
@@ -419,25 +419,25 @@ class _UserHomeState extends State<UserHome> {
       "name": "Grilled Steak",
       "restaurant": "Steak House",
       "price": 120,
-      "image": "assets/images/meat_1.png"
+      "image": "assets/meat_1.png"
     },
     {
       "name": "BBQ Ribs",
       "restaurant": "Smokehouse Grill",
       "price": 150,
-      "image": "assets/images/meat_2.png"
+      "image": "assets/meat_2.png"
     },
     {
       "name": "Lamb Chops",
       "restaurant": "Mediterranean Delight",
       "price": 180,
-      "image": "assets/images/meat_3.png"
+      "image": "assets/meat_3.png"
     },
     {
       "name": "Tandoori Chicken",
       "restaurant": "Spicy Corner",
       "price": 100,
-      "image": "assets/images/meat_4.png"
+      "image": "assets/meat_4.png"
     }
   ];
   List<Map<String, dynamic>> vegetableList = [
@@ -445,25 +445,25 @@ class _UserHomeState extends State<UserHome> {
       "name": "Fresh Salad",
       "restaurant": "Healthy Bites",
       "price": 30,
-      "image": "assets/images/vegetable_1.png"
+      "image": "assets/vegetable_1.png"
     },
     {
       "name": "Grilled Veggies",
       "restaurant": "Green Delight",
       "price": 40,
-      "image": "assets/images/vegetable_2.png"
+      "image": "assets/vegetable_2.png"
     },
     {
       "name": "Mixed Stir-Fry",
       "restaurant": "Veggie Heaven",
       "price": 35,
-      "image": "assets/images/vegetable_3.png"
+      "image": "assets/vegetable_3.png"
     },
     {
       "name": "Broccoli & Carrot Mix",
       "restaurant": "Organic Kitchen",
       "price": 45,
-      "image": "assets/images/vegetable_4.png"
+      "image": "assets/vegetable_4.png"
     }
   ];
   List<Map<String, dynamic>> dessertList = [
@@ -471,25 +471,25 @@ class _UserHomeState extends State<UserHome> {
       "name": "Chocolate Cake",
       "restaurant": "Sweet Treats",
       "price": 50,
-      "image": "assets/images/dessert_1.png"
+      "image": "assets/dessert_1.png"
     },
     {
       "name": "Ice Cream Sundae",
       "restaurant": "Frosty Delights",
       "price": 40,
-      "image": "assets/images/dessert_2.png"
+      "image": "assets/dessert_2.png"
     },
     {
       "name": "Strawberry Cheesecake",
       "restaurant": "Cheese Heaven",
       "price": 55,
-      "image": "assets/images/dessert_3.png"
+      "image": "assets/dessert_3.png"
     },
     {
       "name": "Brownie with Ice Cream",
       "restaurant": "Chocolate House",
       "price": 45,
-      "image": "assets/images/dessert_4.png"
+      "image": "assets/dessert_4.png"
     }
   ];
 
