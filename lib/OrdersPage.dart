@@ -76,7 +76,7 @@ class _OrdersPageState extends State<OrdersPage> {
                  contentPadding: const EdgeInsets.all(16),
                  leading: CircleAvatar(
                    backgroundColor: Colors.amber.shade700,
-                   radius: 30,
+                   radius: 20,
                    child: Text(
                      "#${order['id']}",
                      style: GoogleFonts.poppins(
@@ -134,6 +134,23 @@ class _OrdersPageState extends State<OrdersPage> {
                          ),
                        ],
                      ),
+                     const SizedBox(height: 8),
+                     Row(
+                       children: [
+                         Icon(Icons.access_time, color: Colors.grey, size: 18),
+                         const SizedBox(width: 5),
+                         Text(
+                           order['timestamp'] ?? 'N/A',
+                           style: GoogleFonts.poppins(
+                             fontSize: 14,
+                             color: Colors.black54,
+                           ),
+                           overflow: TextOverflow.ellipsis,
+                           maxLines: 2,
+                         ),
+
+               ],
+             ),
                      const SizedBox(height: 8),
                      Row(
                        children: [

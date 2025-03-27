@@ -23,12 +23,14 @@
   
       return await openDatabase(
         path,
-        version: 2, // Increment version when modifying schema
+        version: 3, // Increment version when modifying schema
         onCreate: _createDB,
         onUpgrade: _onUpgrade,
       );
     }
-  
+
+
+
     Future<void> _createDB(Database db, int version) async {
       await db.execute('''
        CREATE TABLE users (
@@ -56,25 +58,28 @@
       paymentMethod TEXT
     )
   ''');
-  
-  
-        await db.execute('''
-      CREATE TABLE IF NOT EXISTS orders (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        userId INTEGER,
-        foodItemId INTEGER,
-        foodName TEXT,  -- Add foodName column
-        quantity INTEGER,
-        totalPrice REAL,
-        address TEXT,
-         phoneNumber TEXT,
-        landmark TEXT,
-        status TEXT,
-        paymentMethod TEXT
-      )
-    ''');
-  
-  
+
+
+      await db.execute('''
+  CREATE TABLE IF NOT EXISTS orders (  -- ✅ Fix: Prevent duplicate table creation
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    userId INTEGER,
+    foodItemId INTEGER,
+    foodName TEXT,
+    quantity INTEGER,
+    totalPrice REAL,
+    address TEXT,
+    phoneNumber TEXT,
+    landmark TEXT,
+    status TEXT,
+    paymentMethod TEXT,
+    timestamp TEXT
+  )
+''');
+
+
+
+
       await db.execute('''
         CREATE TABLE food_items (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -83,7 +88,7 @@
           image TEXT
         )
       ''');
-  
+
       await db.execute('''
        CREATE TABLE IF NOT EXISTS orders (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -99,23 +104,35 @@
       FOREIGN KEY (userId) REFERENCES users(id),
       FOREIGN KEY (foodItemId) REFERENCES food_items(id)
   )
-  
+
       ''');
       await db.execute('''
-            CREATE TABLE favorites (
-              id INTEGER PRIMARY KEY AUTOINCREMENT,
-              user_id INTEGER,
-              food_id INTEGER
-            )
-          ''');
+  CREATE TABLE IF NOT EXISTS favorites (  
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    food_id INTEGER,
+    name TEXT,  -- ✅ Ensure the 'name' column is here
+    image TEXT,
+    price REAL
+  )
+''');
+
     }
-  
-    Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-      if (oldVersion < 2) {
-        await db.execute('ALTER TABLE orders ADD COLUMN foodName TEXT');
-        await db.execute('ALTER TABLE orders ADD COLUMN phoneNumber TEXT'); // ✅ Add phoneNumber here
+    Future<void> printFavoritesTableSchema() async {
+      final db = await DatabaseHelper.instance.database;
+      List<Map<String, dynamic>> result = await db.rawQuery("PRAGMA table_info(favorites)");
+
+      for (var column in result) {
+        print("Column: ${column['name']} | Type: ${column['type']}");
       }
-  
+    }
+
+    Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+      if (oldVersion < 3) { // Ensure new version is higher
+        await db.execute('ALTER TABLE favorites ADD COLUMN name TEXT;');
+        await db.execute('ALTER TABLE favorites ADD COLUMN image TEXT;');
+        await db.execute('ALTER TABLE favorites ADD COLUMN price REAL;');
+      }
     }
 
 
@@ -129,6 +146,7 @@
         String foodName,
         String phoneNumber,
         String landmark,
+        String timestamp,
         ) async {
       print("Storing Order: Phone Number = $phoneNumber");
 
@@ -146,6 +164,7 @@
           'landmark': landmark,
           'status': 'Processing',
           'paymentMethod': paymentMethod,
+          'timestamp': timestamp,
         },
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
@@ -176,7 +195,22 @@
       }
       return null; // Return null if no user found
     }
-  
+    Future<void> addToFavorites(int userId, int foodId, String name, String image, int price) async {
+      final db = await database;
+      await db.insert(
+        'favorites',
+        {
+          'user_id': userId,
+          'food_id': foodId,
+          'name': name,
+          'image': image,
+          'price': price,
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace, // Update if already exists
+      );
+    }
+
+
     Future<void> updateFoodPrice(int id, String name, double price, String imagePath) async {
       final db = await database;
       await db.update(
@@ -225,28 +259,20 @@
   
   
   
-    // Future<List<Map<String, dynamic>>> getUserOrders(int userId) async {
-    //   final db = await database;
-    //   return await db.query(
-    //     'orders',
-    //     where: 'userId = ?',
-    //     whereArgs: [userId],
-    //   );
-    // }
-  
+
+
     Future<List<Map<String, dynamic>>> getOrders() async {
       final db = await database;
-      return await db.rawQuery('''
-      SELECT orders.id, orders.totalPrice, orders.status, orders.address,
-             food_items.name AS foodName
-      FROM orders
-      INNER JOIN food_items ON orders.foodItemId = food_items.id
-    ''');
+      return await db.query('orders', columns: [
+        'id', 'userId', 'foodItemId', 'foodName', 'quantity', 'totalPrice',
+        'address', 'phoneNumber', 'landmark', 'status', 'paymentMethod', 'timestamp' // Include timestamp
+      ]);
     }
-  
-  
-  
-  
+
+
+
+
+
     Future<int> updateOrderStatus(int orderId, String newStatus) async {
       final db = await instance.database;
       return await db.update(
@@ -256,14 +282,7 @@
         whereArgs: [orderId],
       );
     }
-    Future<void> addToFavorites(int userId, int foodId) async {
-      final db = await database;
-      await db.insert(
-        'favorites',
-        {'user_id': userId, 'food_id': foodId},
-        conflictAlgorithm: ConflictAlgorithm.ignore,
-      );
-    }
+
     Future<void> insertFoodItems(List<Map<String, dynamic>> foodList) async {
       final db = await database;
       for (var food in foodList) {
@@ -288,26 +307,36 @@
         print("Food: ${food['name']} | Image: ${food['image']}"); // ✅ Debugging
       }
     }
-  
-  
-  
-    Future<void> removeFromFavorites(int userId, int foodId) async {
+
+    Future<int> insertFoodItem(String name, String restaurant, int price, String image) async {
+      final db = await database;
+      return await db.insert('food_items', {
+        'name': name,
+        'restaurant': restaurant,
+        'price': price,
+        'image': image,
+      });
+    }
+
+
+    Future<void> removeFromFavorites(int foodId, int userId) async {
       final db = await database;
       await db.delete(
         'favorites',
-        where: 'user_id = ? AND food_id = ?',
-        whereArgs: [userId, foodId],
+        where: 'food_id = ? AND user_id = ?',
+        whereArgs: [foodId, userId], // ✅ Ensure correct args
       );
     }
-  
+
     Future<List<Map<String, dynamic>>> getFavoriteItems(int userId) async {
       final db = await database;
-      return await db.rawQuery('''
-      SELECT f.* FROM food_items f 
-      INNER JOIN favorites fav ON f.id = fav.food_id 
-      WHERE fav.user_id = ?
-    ''', [userId]);
+      return await db.query(
+        'favorites',
+        where: 'user_id = ?',
+        whereArgs: [userId],
+      );
     }
+
     Future<int> createUser(String name, String email, String password, String phone, String address, String role) async {
       final db = await instance.database;
       return await db.insert('users', {
@@ -341,28 +370,40 @@
         whereArgs: [email],
       );
     }
-  
-  
+
+    Future<void> addToFavoritesByName(int userId, String name) async {
+      final db = await database;
+      await db.insert(
+        'favorites',
+        {'user_id': userId, 'name': name},
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+
+    Future<void> removeFromFavoritesByName(int userId, String name) async {
+      final db = await database;
+      await db.delete(
+        'favorites',
+        where: 'user_id = ? AND name = ?',
+        whereArgs: [userId, name],
+      );
+    }
+
     Future<int> addFoodItem(String name, double price, String image) async {
       final db = await instance.database;
       return await db.insert('food_items', {'name': name, 'price': price, 'image': image});
     }
-  
+
+
+
     Future<List<Map<String, dynamic>>> getFoodItems() async {
-      final db = await DatabaseHelper.instance.database;
-      final result = await db.query('food_items');
-  
-      return result.map((food) {
-        return {
-          'id': food['id'] ?? 0,
-          'name': food['name'] ?? 'Unknown',
-          'price': food['price'] ?? 0.0,
-          'image': food['image'] , // Provide a default image
-        };
-      }).toList();
+      final db = await database;
+      return await db.query('food_items'); // ✅ 'id' automatically include hoga
     }
-  
-  
+
+
+
+
     Future<int> deleteFoodItem(int id) async {
       final db = await instance.database;
       return await db.delete('food_items', where: 'id = ?', whereArgs: [id]);

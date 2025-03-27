@@ -10,7 +10,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:unieaat/services/database_service.dart';
 import 'OrderStatusPage.dart';
 import 'login_screen.dart';
-
+import 'package:intl/intl.dart';
 class UserHome extends StatefulWidget {
   const UserHome({super.key});
 
@@ -33,8 +33,9 @@ class _UserHomeState extends State<UserHome> {
   final TextEditingController searchController = TextEditingController();
   TextEditingController phoneController = TextEditingController();
   TextEditingController addressController = TextEditingController();
-  TextEditingController _phoneController = TextEditingController();
-  TextEditingController _landmarkController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _landmarkController = TextEditingController();
+
   TextEditingController _addressController =
   TextEditingController();
   bool isPhoneValid = true;
@@ -44,6 +45,7 @@ class _UserHomeState extends State<UserHome> {
   @override
   void initState() {
     super.initState();
+    printFavoritesTableSchema();
     _initializeData();
     _phoneController.addListener(() {
       setState(() {
@@ -82,24 +84,28 @@ class _UserHomeState extends State<UserHome> {
   }
   List<Map<String, dynamic>> burgerList = [
     {
+      "id": 5,
       "name": "Burger Bistro",
       "restaurant": "Rose Garden",
       "price": 40,
       "image": "assets/burger_bistro.png",
     },
     {
+      "id": 6,
       "name": "Smokin' Burger",
       "restaurant": "Cafenio Restaurant",
       "price": 60,
       "image": "assets/smokin_burger.png",
     },
     {
+      "id": 7,
       "name": "Buffalo Burgers",
       "restaurant": "Kaji Firm Kitchen",
       "price": 75,
       "image": "assets/buffalo_burger.png",
     },
     {
+      "id": 8,
       "name": "Bullseye Burgers",
       "restaurant": "Kabab Restaurant",
       "price": 94,
@@ -108,24 +114,28 @@ class _UserHomeState extends State<UserHome> {
   ];
   List<Map<String, dynamic>> pizzaList = [
     {
+      "id": 9,
       "name": "Cheese Lovers",
       "restaurant": "Pizza Hut",
       "price": 30,
       "image": "assets/cheese_lovers.png",
     },
     {
+      "id": 10,
       "name": "Pepperoni Feast",
       "restaurant": "Dominos",
       "price": 45,
       "image": "assets/pepperoni_pizza.png",
     },
     {
+      "id": 11,
       "name": "BBQ Chicken Pizza",
       "restaurant": "Papa Johns",
       "price": 50,
       "image": "assets/bbq_chicken_pizza.png",
     },
     {
+      "id": 12,
       "name": "Veggie Delight",
       "restaurant": "Local Pizzeria",
       "price": 35,
@@ -134,24 +144,28 @@ class _UserHomeState extends State<UserHome> {
   ];
   List<Map<String, dynamic>> noodlesList = [
     {
+      "id": 13,
       "name": "Spicy Chicken Noodles",
       "restaurant": "Asian Bites",
       "price": 50,
       "image": "assets/Noodles_1.png",
     },
     {
+      "id": 14,
       "name": "Garlic Butter Noodles",
       "restaurant": "Noodle House",
       "price": 40,
       "image": "assets/Noodles_2.png",
     },
     {
+      "id": 15,
       "name": "Schezwan Noodles",
       "restaurant": "Dragon Wok",
       "price": 55,
       "image": "assets/Noodles_3.png",
     },
     {
+      "id": 16,
       "name": "Veggie Stir-Fry Noodles",
       "restaurant": "Green Kitchen",
       "price": 45,
@@ -160,24 +174,28 @@ class _UserHomeState extends State<UserHome> {
   ];
   List<Map<String, dynamic>> meatList = [
     {
+      "id": 17,
       "name": "Grilled Steak",
       "restaurant": "Steak House",
       "price": 120,
       "image": "assets/meat_1.png",
     },
     {
+      "id": 18,
       "name": "BBQ Ribs",
       "restaurant": "Smokehouse Grill",
       "price": 150,
       "image": "assets/meat_2.png",
     },
     {
+      "id": 19,
       "name": "Lamb Chops",
       "restaurant": "Mediterranean Delight",
       "price": 180,
       "image": "assets/meat_3.png",
     },
     {
+      "id": 20,
       "name": "Tandoori Chicken",
       "restaurant": "Spicy Corner",
       "price": 100,
@@ -186,24 +204,28 @@ class _UserHomeState extends State<UserHome> {
   ];
   List<Map<String, dynamic>> vegetableList = [
     {
+      "id": 21,
       "name": "Fresh Salad",
       "restaurant": "Healthy Bites",
       "price": 30,
       "image": "assets/vegetable_1.png",
     },
     {
+      "id": 22,
       "name": "Grilled Veggies",
       "restaurant": "Green Delight",
       "price": 40,
       "image": "assets/vegetable_2.png",
     },
     {
+      "id": 23,
       "name": "Mixed Stir-Fry",
       "restaurant": "Veggie Heaven",
       "price": 35,
       "image": "assets/vegetable_3.png",
     },
     {
+      "id": 24,
       "name": "Broccoli & Carrot Mix",
       "restaurant": "Organic Kitchen",
       "price": 45,
@@ -212,30 +234,35 @@ class _UserHomeState extends State<UserHome> {
   ];
   List<Map<String, dynamic>> dessertList = [
     {
+      "id": 1,  // ✅ Unique ID
       "name": "Chocolate Cake",
       "restaurant": "Sweet Treats",
       "price": 50,
       "image": "assets/dessert_1.png",
     },
     {
+      "id": 2,
       "name": "Ice Cream Sundae",
       "restaurant": "Frosty Delights",
       "price": 40,
       "image": "assets/dessert_2.png",
     },
     {
+      "id": 3,
       "name": "Strawberry Cheesecake",
       "restaurant": "Cheese Heaven",
       "price": 55,
       "image": "assets/dessert_3.png",
     },
     {
+      "id": 4,
       "name": "Brownie with Ice Cream",
       "restaurant": "Chocolate House",
       "price": 45,
       "image": "assets/dessert_4.png",
     },
   ];
+
   Future<void> _loadFoodItems() async {
     final item = await DatabaseHelper.instance.getFoodItems();
     print("Loaded Food Items: $item");
@@ -261,23 +288,7 @@ class _UserHomeState extends State<UserHome> {
       print("User not found in database!");
     }
   }
-  Future<void> _loadFavoriteItems() async {
-    int userId = 1; // Replace with actual logged-in user ID
-    final item = await DatabaseHelper.instance.getFavoriteItems(userId);
-    setState(() => favoriteItems = item);
-  }
-  Future<void> _toggleFavorite(Map<String, dynamic> item) async {
-    int userId = 1; // Replace with actual user ID
-    bool isFav = favoriteItems.any((fav) => fav['id'] == item['id']);
 
-    if (isFav) {
-      await DatabaseHelper.instance.removeFromFavorites(userId, item['id']);
-    } else {
-      await DatabaseHelper.instance.addToFavorites(userId, item['id']);
-    }
-
-    _loadFavoriteItems();
-  }
   List<Map<String, dynamic>> food = [
     {"id": 1, "name": "Burger"},
     {"id": 2, "name": "Pizza"},
@@ -376,8 +387,6 @@ class _UserHomeState extends State<UserHome> {
     );
   }
 
-
-
   Widget _buildFoodItem(void Function(String) onCategorySelected) {
     final List<Map<String, String>> categories = [
       {"icon": "🍔", "label": "Hamburger"},
@@ -426,7 +435,6 @@ class _UserHomeState extends State<UserHome> {
       },
     );
   }
-
   Widget _buildFoodGrid() {
     List<Map<String, dynamic>> displayList = [];
 
@@ -503,198 +511,242 @@ class _UserHomeState extends State<UserHome> {
       ],
     );
   }
+  Future<void> _loadFavoriteItems() async {
+    int userId = 1; // Replace with actual logged-in user ID
+    final items = await DatabaseHelper.instance.getFavoriteItems(userId);
 
-  Widget _buildFoodCard(Map<String, dynamic> item, bool isFavorite) {
-    print("Image URL: ${item['image']}");
-    print("Checking Image Path: ${item['image']}");
-    print("File Exists: ${File(item['image']).existsSync()}");
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      elevation: 3,
-      child: Container(
-        height: 300, // Fixed height to prevent overflow
-        padding: const EdgeInsets.all(10.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Stack(
-                children: [
-                  GestureDetector(
-                    child:
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: item['image'] != null && item['image'].startsWith('assets/')
-                          ? Image.asset(
-                        item['image'], // Directly use Image.asset for assets folder
-                        width: double.infinity,
-                        height: 100,
-                        fit: BoxFit.cover,
-                      )
-                          : Image.file(
-                        File(item['image']), // Only use File() for local storage paths
-                        width: double.infinity,
-                        height: 100,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+    print("DEBUG: Loaded Favorite Items => $items"); // ✅ Debug log
 
-                  ),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
-                      child: IconButton(
-                        onPressed: () => _addToCart(item),
-                        icon: const Icon(
-                          Icons.add_shopping_cart,
-                          color: Colors.white,
-                        ),
-                        iconSize: 20,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-
-              Text(
-                item['name'],
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                "Pkr ${item['price']}",
-                style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey),
-              ),
-
-              const SizedBox(height: 8),
-
-              // 🟡 Rating & Favorite Button
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.star, color: Colors.orange, size: 18),
-                      const SizedBox(width: 5),
-                      Text(
-                        item['rating']?.toString() ?? "4.0",
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      isFavorite ? Icons.favorite : Icons.favorite_border,
-                      color: isFavorite ? Colors.red : Colors.grey,
-                    ),
-                    onPressed: () => _toggleFavorite(item),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+    setState(() => favoriteItems = items);
   }
+
+  Future<void> _toggleFavorite(Map<String, dynamic> item) async {
+      print("DEBUG: Item Data => $item");
+
+      if (!item.containsKey('id')) {
+        item['id'] = DateTime.now().millisecondsSinceEpoch; // ✅ Assign unique ID if missing
+      }
+
+      int foodId = item['id'];
+      int userId = 1; // Actual user ID add karo
+
+      bool isFav = favoriteItems.any((fav) => fav['id'] == foodId);
+
+      if (isFav) {
+        await DatabaseHelper.instance.removeFromFavorites(item['food_id'], userId!);
+        print("✅ Removed from favorites");
+      } else {
+        await DatabaseHelper.instance.addToFavorites(
+            userId,
+            foodId,
+            item['name'],
+            item['image'],
+            item['price']
+        );
+        print("❤️ Added to favorites");
+      }
+
+      _loadFavoriteItems(); // Refresh list
+    }
+
 
   Widget _buildFavoritesPage() {
     return favoriteItems.isEmpty
         ? const Center(
-          child: Text("No favorites added yet", style: TextStyle(fontSize: 18)),
-        )
-        : foodItems.isEmpty
-        ? const Center(child: Text("No food items available"))
+      child: Text("No favorites added yet", style: TextStyle(fontSize: 18)),
+    )
         : GridView.builder(
-          padding: const EdgeInsets.all(12.0),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 15,
-            mainAxisSpacing: 15,
-            childAspectRatio: 0.75,
+      padding: const EdgeInsets.all(12.0),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 15,
+        mainAxisSpacing: 15,
+        childAspectRatio: 0.75,
+      ),
+      itemCount: favoriteItems.length, // ✅ Use favoriteItems
+      itemBuilder: (context, index) {
+        final item = favoriteItems[index]; // ✅ Use favoriteItems
+        return Card(
+          color: Colors.amber.shade100,
+          elevation: 6,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
           ),
-          itemCount: foodItems.length,
-          itemBuilder: (context, index) {
-            final item = foodItems[index];
-            bool isFavorite = favoriteItems.any(
-              (fav) => fav['id'] == item['id'],
-            );
-            return Card(
-              color: Colors.amber.shade100,
-              elevation: 6,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
+          child: Column(
+            children: [
+              Expanded(
+                child: item['image'] != null &&
+                    item['image'].startsWith('assets/')
+                    ? Image.asset(
+                  item['image'],
+                  width: double.infinity,
+                  height: 100,
+                  fit: BoxFit.cover,
+                )
+                    : Image.file(
+                  File(item['image']),
+                  width: double.infinity,
+                  height: 100,
+                  fit: BoxFit.cover,
+                ),
               ),
-              child: Column(
-                children: [
-                  Expanded(
-                    child:
-                    item['image'] != null && item['image'].startsWith('assets/')
-                        ? Image.asset(
-                      item['image'], // Directly use Image.asset for assets folder
-                      width: double.infinity,
-                      height: 100,
-                      fit: BoxFit.cover,
-                    )
-                        : Image.file(
-                      File(item['image']), // Only use File() for local storage paths
-                      width: double.infinity,
-                      height: 100,
-                      fit: BoxFit.cover,
+              Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Column(
+                  children: [
+                    Text(
+                      item['name'],
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
+                    Text(
+                      "PKR${item['price']}",
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        color: Colors.green,
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => _addToCart(item),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.amber.shade700,
+                      ),
+                      child: const Text(
+                        "+ Add to Cart",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () => _toggleFavorite(item),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildFoodCard(Map<String, dynamic> item, bool isFavorite) {
+      print("Image URL: ${item['image']}");
+      print("Checking Image Path: ${item['image']}");
+      print("File Exists: ${File(item['image']).existsSync()}");
+      return Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        elevation: 3,
+        child: Container(
+          height: 300, // Fixed height to prevent overflow
+          padding: const EdgeInsets.all(10.0),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Stack(
+                  children: [
+                    GestureDetector(
+                      child:
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: item['image'] != null && item['image'].startsWith('assets/')
+                            ? Image.asset(
+                          item['image'], // Directly use Image.asset for assets folder
+                          width: double.infinity,
+                          height: 100,
+                          fit: BoxFit.cover,
+                        )
+                            : Image.file(
+                          File(item['image']), // Only use File() for local storage paths
+                          width: double.infinity,
+                          height: 100,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+
+                    ),
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          onPressed: () => _addToCart(item),
+                          icon: const Icon(
+                            Icons.add_shopping_cart,
+                            color: Colors.white,
+                          ),
+                          iconSize: 20,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+
+                Text(
+                  item['name'],
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Column(
+                ),
+                Text(
+                  "Pkr ${item['price']}",
+                  style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey),
+                ),
+
+                const SizedBox(height: 8),
+
+                // 🟡 Rating & Favorite Button
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
                       children: [
+                        const Icon(Icons.star, color: Colors.orange, size: 18),
+                        const SizedBox(width: 5),
                         Text(
-                          item['name'],
+                          item['rating']?.toString() ?? "4.0",
                           style: GoogleFonts.poppins(
-                            fontSize: 18,
+                            fontSize: 14,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Text(
-                          "PKR${item['price']}",
-                          style: GoogleFonts.poppins(
-                            fontSize: 16,
-                            color: Colors.green,
-                          ),
-                        ),
-                        ElevatedButton(
-                          onPressed: () => _addToCart(item),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.amber.shade700,
-                          ),
-                          child: const Text(
-                            "+ Add to Cart",
-                            style: TextStyle(color: Colors.black),
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => _toggleFavorite(item),
-                        ),
                       ],
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
+                    IconButton(
+                      icon: Icon(
+                        isFavorite ? Icons.favorite : Icons.favorite_border,
+                        color: isFavorite ? Colors.red : Colors.grey,
+                      ),
+                      onPressed: () => _toggleFavorite(item),
+                    )
+
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+  Future<void> printFavoritesTableSchema() async {
+    final db = await DatabaseHelper.instance.database;
+    List<Map<String, dynamic>> result = await db.rawQuery("PRAGMA table_info(favorites)");
+
+    for (var column in result) {
+      print("Column: ${column['name']} | Type: ${column['type']}");
+    }
   }
+
+
 
   void _addToCart(Map<String, dynamic> item) {
     setState(() {
@@ -711,23 +763,33 @@ class _UserHomeState extends State<UserHome> {
   }
 
   Future<void> placeOrder(
-    int userId,
-    int foodItemId,
-    int quantity,
-    double price,
-    String address,
-  ) async {
+      int userId,
+      int foodItemId,
+      int quantity,
+      double totalPrice,
+      String address,
+      String paymentMethod,
+      String foodName,
+      String phoneNumber,
+      String landmark,
+      String timestamp, // Add timestamp
+      )async {
     final db = await DatabaseHelper.instance.database;
     await db.insert('orders',
-        {
-      'userId': userId,
-      'foodItemId': foodItemId,
-      'quantity': quantity,
-      'totalPrice': price,
-      'address': address, // Manually entered address
-      'status': 'Processing',
-    },
-        conflictAlgorithm: ConflictAlgorithm.replace);
+      {
+        'userId': userId,
+        'foodItemId': foodItemId,
+        'foodName': foodName,
+        'quantity': quantity,
+        'totalPrice': totalPrice,
+        'address': address,
+        'phoneNumber': phoneNumber,
+        'landmark': landmark,
+        'status': 'Processing',
+        'paymentMethod': paymentMethod,
+        'timestamp': timestamp, // Store timestamp
+      },
+    );
   }
 
   Future<void> showPaymentBottomSheet(BuildContext context) async {
@@ -843,13 +905,10 @@ class _UserHomeState extends State<UserHome> {
   }
 
   void _showAddressBottomSheet() {
-// Address controller
 
     Future<void> _getCurrentLocation() async {
       bool serviceEnabled;
       LocationPermission permission;
-
-      // Check if location services are enabled
       serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         return;
@@ -878,8 +937,6 @@ class _UserHomeState extends State<UserHome> {
 
           String fullAddress =
               "${place.street}, ${place.subLocality}, ${place.locality}, ${place.country}";
-
-          // Update text field
           _addressController.text = fullAddress;
         }
       } catch (e) {
@@ -991,22 +1048,32 @@ class _UserHomeState extends State<UserHome> {
                         if (mounted) {
                           Navigator.pop(context);
                         }
-
+                        // debugPrint("Saving Order with: Address: $address, Phone: $phoneNumber, Landmark: $landmark");
+                        String formattedDate = DateFormat('dd-M-yy h:mm a').format(DateTime.now());
                         int userId = 1;
                         String address = _addressController.text;
-                        String phoneNumber = _phoneController.text;
-                        String landmark = _landmarkController.text;
+                        String phoneNumber = _phoneController.text.trim().isNotEmpty
+                            ? _phoneController.text.trim()
+                            : "N/A";
 
+                        String landmark = _landmarkController.text.trim().isNotEmpty
+                            ? _landmarkController.text.trim()
+                            : "N/A";
                         if (paymentMethod == "Online") {
                           await showPaymentBottomSheet(context);
                         }
-
+                        debugPrint("🚀 Saving Order Details:");
+                        debugPrint("User ID: $userId");
+                        debugPrint("Address: $address");
+                        debugPrint("Phone Number: $phoneNumber");
+                        debugPrint("Landmark: $landmark");
+                        debugPrint("Payment Method: $paymentMethod");
+                        debugPrint("Cart Items Count: ${cartItems.length}");
                         for (var item in cartItems) {
                           int foodItemId = item['id'] ?? 0;
                           String foodName = item['name'];
                           double price = (item['price'] as num?)?.toDouble() ?? 0.0;
                           int quantity = 1;
-
                           await DatabaseHelper.instance.placeOrder(
                             userId,
                             foodItemId,
@@ -1017,7 +1084,9 @@ class _UserHomeState extends State<UserHome> {
                             foodName,
                             phoneNumber,
                             landmark,
+                              formattedDate, // Send current date & time
                           );
+
                         }
 
                         debugPrint(
