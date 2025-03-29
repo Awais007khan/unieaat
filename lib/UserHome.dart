@@ -595,68 +595,105 @@ class _UserHomeState extends State<UserHome> {
       itemCount: favoriteItems.length, // ✅ Use favoriteItems
       itemBuilder: (context, index) {
         final item = favoriteItems[index]; // ✅ Use favoriteItems
-        return Card(
-          color: Colors.amber.shade100,
-          elevation: 6,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: Column(
-            children: [
-              Expanded(
-                child: item['image'] != null &&
-                    item['image'].startsWith('assets/')
-                    ? Image.asset(
-                  item['image'],
-                  width: double.infinity,
-                  height: 100,
-                  fit: BoxFit.cover,
-                )
-                    : Image.file(
-                  File(item['image']),
-                  width: double.infinity,
-                  height: 100,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              Padding(
+        return
+          SizedBox(
+            width: double.infinity, // Makes Card take full available width
+            child: Card(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              elevation: 3,
+              child: Container(
+                height: 900, // Fixed height
                 padding: const EdgeInsets.all(10.0),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(
-                      item['name'],
-                      style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    // Stack to position delete & cart buttons
+                    Stack(
+                      children: [
+                        // Circular Image
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(100),
+                          child: Image.asset(
+                            item['image'],
+                            width: double.infinity,
+                            height: 120, // Increased size
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+
+                        // Add to Cart Button (Top Right)
+                        Positioned(
+                          top: 8,
+                          right: 3,
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            child: IconButton(
+                              onPressed: () => _addToCart(item),
+                              icon: const Icon(
+                                Icons.add_shopping_cart,
+                                color: Colors.white,
+                              ),
+                              iconSize: 24,
+                            ),
+                          ),
+                        ),
+
+                        // Delete Button (Top Left)
+                        Positioned(
+                          top: 8,
+                          left: 3,
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            child: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () => _toggleFavorite(item),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    Text(
-                      "PKR${item['price']}",
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        color: Colors.green,
+
+                    // Content Section
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            item['name'],
+                            style: GoogleFonts.poppins(
+                              fontSize: 14, // Larger text
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            "PKR${item['price']}",
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              color: Colors.green,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    ElevatedButton(
-                      onPressed: () => _addToCart(item),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.amber.shade700,
-                      ),
-                      child: const Text(
-                        "+ Add to Cart",
-                        style: TextStyle(color: Colors.black),
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      onPressed: () => _toggleFavorite(item),
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
-        );
+            ),
+          );
+
+
+
+
+
+
+
       },
     );
   }
