@@ -44,20 +44,22 @@
   )
       ''');
       await db.execute('''
-    CREATE TABLE orders (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      userId INTEGER,
-      foodItemId INTEGER,
-      foodName TEXT,   -- ✅ Add this line
-      quantity INTEGER,
-      totalPrice REAL,
-      address TEXT,
-        phoneNumber TEXT,  -- ✅ New column
-        landmark TEXT,
-      status TEXT,
-      paymentMethod TEXT
-    )
-  ''');
+  CREATE TABLE orders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    userId INTEGER,
+    foodItemId INTEGER,
+    foodName TEXT,
+    quantity INTEGER,
+    totalPrice REAL,
+    address TEXT,
+    phoneNumber TEXT,
+    landmark TEXT,
+    status TEXT,
+    paymentMethod TEXT,
+    timestamp TEXT
+  )
+''');
+
 
 
       await db.execute('''

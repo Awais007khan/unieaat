@@ -288,6 +288,16 @@ class _UserHomeState extends State<UserHome> {
       print("User not found in database!");
     }
   }
+  List<Map<String, dynamic>> getAllFoodItems() {
+    return [
+      ...burgerList,
+      ...pizzaList,
+      ...noodlesList,
+      ...meatList,
+      ...vegetableList,
+      ...dessertList,
+    ];
+  }
 
   List<Map<String, dynamic>> food = [
     {"id": 1, "name": "Burger"},
@@ -296,15 +306,102 @@ class _UserHomeState extends State<UserHome> {
   ];
   void _filterFoods(String query) {
     setState(() {
-      filteredFoodItems =
-          foodItems
-              .where(
-                (item) =>
-                    item['name'].toLowerCase().contains(query.toLowerCase()),
-              )
-              .toList();
+      if (query.isEmpty) {
+        filteredFoodItems = getAllFoodItems(); // Show all food items if search is empty
+      } else {
+        filteredFoodItems = getAllFoodItems().where((item) {
+          return item['name'].toLowerCase().contains(query.toLowerCase());
+        }).toList();
+      }
     });
+    setState(() {
+      filteredFoodItems = List.from(filteredFoodItems);
+    });
+
+    print("Filtered Food Items: $filteredFoodItems");
+
   }
+
+
+
+  Widget _buildFoodGrid() {
+    List<Map<String, dynamic>> displayList;
+
+    if (searchController.text.isNotEmpty) {
+      displayList = filteredFoodItems;
+    }
+    else if (selectedCategory == "Hamburger") {
+      displayList = burgerList;
+    } else if (selectedCategory == "Pizza") {
+      displayList = pizzaList;
+    } else if (selectedCategory == "Noodles") {
+      displayList = noodlesList;
+    } else if (selectedCategory == "Meat") {
+      displayList = meatList;
+    } else if (selectedCategory == "Vegetables") {
+      displayList = vegetableList;
+    } else if (selectedCategory == "Dessert") {
+      displayList = dessertList;
+    }
+    else {
+      displayList = getAllFoodItems();
+    }
+
+    return Column(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: TextField(
+                    controller: searchController,
+                    onChanged: _filterFoods,
+                    decoration: InputDecoration(
+                      hintText: "Search food...",
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+                _buildFoodSlider(),
+                _buildFoodItem((selected) {
+                  setState(() {
+                    selectedCategory = selected;
+                  });
+                }),
+                SizedBox(height: 10),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(12.0),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 15,
+                    mainAxisSpacing: 15,
+                    childAspectRatio: 0.75,
+                  ),
+                  itemCount: displayList.length, // 🔹 Always use filtered list
+                  itemBuilder: (context, index) {
+                    final item = displayList[index];
+                    bool isFavorite = favoriteItems.any(
+                          (fav) => fav['name'] == item['name'],
+                    );
+                    return _buildFoodCard(item, isFavorite);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildFoodSlider() {
     final List<Widget> banners = [
       _buildBanner(
@@ -324,6 +421,12 @@ class _UserHomeState extends State<UserHome> {
         "Grocery & more..",
         "assets/s.png",
         Color(0xFF85C0FC),
+      ),
+      _buildBanner(
+        "The Best",
+        "Options of the day \n in your university",
+        "assets/banner_4.png",
+        Color(0xFF044783),
       ),
     ];
 
@@ -423,7 +526,7 @@ class _UserHomeState extends State<UserHome> {
               Text(
                 category["label"]!,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 10,
                   fontWeight: FontWeight.w500,
                   color: Colors.black87,
                 ),
@@ -435,82 +538,7 @@ class _UserHomeState extends State<UserHome> {
       },
     );
   }
-  Widget _buildFoodGrid() {
-    List<Map<String, dynamic>> displayList = [];
 
-    if (selectedCategory == "Hamburger") {
-      displayList = burgerList;
-    } else if (selectedCategory == "Pizza") {
-      displayList = pizzaList;
-    } else if (selectedCategory == "Noodles") {
-      displayList = noodlesList;
-    } else if (selectedCategory == "Meat") {
-      displayList = meatList;
-    } else if (selectedCategory == "Vegetables") {
-      displayList = vegetableList;
-    } else if (selectedCategory == "Dessert") {
-      displayList = dessertList;
-    } else {
-      displayList = foodItems;
-    }
-
-    return Column(
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            // 🔹 Wrap Column with SingleChildScrollView
-            child: Column(
-              children: [
-                SizedBox(height: 20),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                  child: TextField(
-                    controller: searchController,
-                    onChanged: _filterFoods,
-                    decoration: InputDecoration(
-                      hintText: "Search food...",
-                      prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ),
-                _buildFoodSlider(),
-                _buildFoodItem((selected) {
-                  setState(() {
-                    selectedCategory = selected; // Update category
-                  });
-                }),
-                SizedBox(height: 10), // Extra spacing to prevent tight layout
-                GridView.builder(
-                  shrinkWrap:
-                      true, // 🔹 Important: GridView ko wrap content banata hai
-                  physics:
-                      NeverScrollableScrollPhysics(), // 🔹 Scrolling prevent karega (kyunki parent scrollable hai)
-                  padding: const EdgeInsets.all(12.0),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 15,
-                    mainAxisSpacing: 15,
-                    childAspectRatio: 0.75,
-                  ),
-                  itemCount: displayList.length,
-                  itemBuilder: (context, index) {
-                    final item = displayList[index];
-                    bool isFavorite = favoriteItems.any(
-                      (fav) => fav['name'] == item['name'],
-                    );
-                    return _buildFoodCard(item, isFavorite);
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
   Future<void> _loadFavoriteItems() async {
     int userId = 1; // Replace with actual logged-in user ID
     final items = await DatabaseHelper.instance.getFavoriteItems(userId);
@@ -640,7 +668,7 @@ class _UserHomeState extends State<UserHome> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         elevation: 3,
         child: Container(
-          height: 300, // Fixed height to prevent overflow
+          height: 600, // Fixed height to prevent overflow
           padding: const EdgeInsets.all(10.0),
           child: SingleChildScrollView(
             child: Column(
@@ -762,7 +790,7 @@ class _UserHomeState extends State<UserHome> {
     );
   }
 
-  Future<void> placeOrder(
+  Future<int> placeOrder(
       int userId,
       int foodItemId,
       int quantity,
@@ -772,10 +800,12 @@ class _UserHomeState extends State<UserHome> {
       String foodName,
       String phoneNumber,
       String landmark,
-      String timestamp, // Add timestamp
-      )async {
-    final db = await DatabaseHelper.instance.database;
-    await db.insert('orders',
+      String timestamp) async {
+
+    final db = await DatabaseHelper.instance.database; // Ensure the database is fetched correctly
+
+    return await db.insert(
+      'orders',
       {
         'userId': userId,
         'foodItemId': foodItemId,
@@ -787,10 +817,13 @@ class _UserHomeState extends State<UserHome> {
         'landmark': landmark,
         'status': 'Processing',
         'paymentMethod': paymentMethod,
-        'timestamp': timestamp, // Store timestamp
+        'timestamp': timestamp,
       },
+      conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
+
+
 
   Future<void> showPaymentBottomSheet(BuildContext context) async {
     double totalPrice = cartItems.fold(
@@ -817,7 +850,6 @@ class _UserHomeState extends State<UserHome> {
                     "Card information",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
-                  const Icon(Icons.photo_camera),
                 ],
               ),
               const SizedBox(height: 8),
@@ -861,7 +893,106 @@ class _UserHomeState extends State<UserHome> {
                   border: OutlineInputBorder(),
                 ),
                 items: const [
+                  DropdownMenuItem(child: Text("Pakistan"), value: "PK"),
                   DropdownMenuItem(child: Text("United States"), value: "US"),
+                  DropdownMenuItem(child: Text("Canada"), value: "CA"),
+                  DropdownMenuItem(child: Text("United Kingdom"), value: "GB"),
+                  DropdownMenuItem(child: Text("Australia"), value: "AU"),
+                  DropdownMenuItem(child: Text("Germany"), value: "DE"),
+                  DropdownMenuItem(child: Text("France"), value: "FR"),
+                  DropdownMenuItem(child: Text("Italy"), value: "IT"),
+                  DropdownMenuItem(child: Text("Spain"), value: "ES"),
+                  DropdownMenuItem(child: Text("Netherlands"), value: "NL"),
+                  DropdownMenuItem(child: Text("Switzerland"), value: "CH"),
+                  DropdownMenuItem(child: Text("Sweden"), value: "SE"),
+                  DropdownMenuItem(child: Text("Norway"), value: "NO"),
+                  DropdownMenuItem(child: Text("Denmark"), value: "DK"),
+                  DropdownMenuItem(child: Text("Finland"), value: "FI"),
+                  DropdownMenuItem(child: Text("Japan"), value: "JP"),
+                  DropdownMenuItem(child: Text("South Korea"), value: "KR"),
+                  DropdownMenuItem(child: Text("China"), value: "CN"),
+                  DropdownMenuItem(child: Text("India"), value: "IN"),
+                  DropdownMenuItem(child: Text("Brazil"), value: "BR"),
+                  DropdownMenuItem(child: Text("Mexico"), value: "MX"),
+                  DropdownMenuItem(child: Text("Argentina"), value: "AR"),
+                  DropdownMenuItem(child: Text("Colombia"), value: "CO"),
+                  DropdownMenuItem(child: Text("Chile"), value: "CL"),
+                  DropdownMenuItem(child: Text("Peru"), value: "PE"),
+                  DropdownMenuItem(child: Text("South Africa"), value: "ZA"),
+                  DropdownMenuItem(child: Text("Nigeria"), value: "NG"),
+                  DropdownMenuItem(child: Text("Egypt"), value: "EG"),
+                  DropdownMenuItem(child: Text("Turkey"), value: "TR"),
+                  DropdownMenuItem(child: Text("Saudi Arabia"), value: "SA"),
+                  DropdownMenuItem(child: Text("United Arab Emirates"), value: "AE"),
+                  DropdownMenuItem(child: Text("Malaysia"), value: "MY"),
+                  DropdownMenuItem(child: Text("Singapore"), value: "SG"),
+                  DropdownMenuItem(child: Text("Thailand"), value: "TH"),
+                  DropdownMenuItem(child: Text("Vietnam"), value: "VN"),
+                  DropdownMenuItem(child: Text("Indonesia"), value: "ID"),
+                  DropdownMenuItem(child: Text("Philippines"), value: "PH"),
+                  DropdownMenuItem(child: Text("New Zealand"), value: "NZ"),
+                  DropdownMenuItem(child: Text("Russia"), value: "RU"),
+                  DropdownMenuItem(child: Text("Ukraine"), value: "UA"),
+                  DropdownMenuItem(child: Text("Poland"), value: "PL"),
+                  DropdownMenuItem(child: Text("Czech Republic"), value: "CZ"),
+                  DropdownMenuItem(child: Text("Hungary"), value: "HU"),
+                  DropdownMenuItem(child: Text("Greece"), value: "GR"),
+                  DropdownMenuItem(child: Text("Portugal"), value: "PT"),
+                  DropdownMenuItem(child: Text("Belgium"), value: "BE"),
+                  DropdownMenuItem(child: Text("Austria"), value: "AT"),
+                  DropdownMenuItem(child: Text("Romania"), value: "RO"),
+                  DropdownMenuItem(child: Text("Bulgaria"), value: "BG"),
+                  DropdownMenuItem(child: Text("Serbia"), value: "RS"),
+                  DropdownMenuItem(child: Text("Croatia"), value: "HR"),
+                  DropdownMenuItem(child: Text("Slovakia"), value: "SK"),
+                  DropdownMenuItem(child: Text("Slovenia"), value: "SI"),
+                  DropdownMenuItem(child: Text("Lithuania"), value: "LT"),
+                  DropdownMenuItem(child: Text("Latvia"), value: "LV"),
+                  DropdownMenuItem(child: Text("Estonia"), value: "EE"),
+                  DropdownMenuItem(child: Text("Kazakhstan"), value: "KZ"),
+                  DropdownMenuItem(child: Text("Uzbekistan"), value: "UZ"),
+                  DropdownMenuItem(child: Text("Qatar"), value: "QA"),
+                  DropdownMenuItem(child: Text("Bahrain"), value: "BH"),
+                  DropdownMenuItem(child: Text("Kuwait"), value: "KW"),
+                  DropdownMenuItem(child: Text("Oman"), value: "OM"),
+                  DropdownMenuItem(child: Text("Lebanon"), value: "LB"),
+                  DropdownMenuItem(child: Text("Jordan"), value: "JO"),
+                  DropdownMenuItem(child: Text("Israel"), value: "IL"),
+                  DropdownMenuItem(child: Text("Morocco"), value: "MA"),
+                  DropdownMenuItem(child: Text("Algeria"), value: "DZ"),
+                  DropdownMenuItem(child: Text("Tunisia"), value: "TN"),
+                  DropdownMenuItem(child: Text("Ethiopia"), value: "ET"),
+                  DropdownMenuItem(child: Text("Kenya"), value: "KE"),
+                  DropdownMenuItem(child: Text("Ghana"), value: "GH"),
+                  DropdownMenuItem(child: Text("Ivory Coast"), value: "CI"),
+                  DropdownMenuItem(child: Text("Senegal"), value: "SN"),
+                  DropdownMenuItem(child: Text("Bangladesh"), value: "BD"),
+                  DropdownMenuItem(child: Text("Sri Lanka"), value: "LK"),
+                  DropdownMenuItem(child: Text("Myanmar"), value: "MM"),
+                  DropdownMenuItem(child: Text("Nepal"), value: "NP"),
+                  DropdownMenuItem(child: Text("Bhutan"), value: "BT"),
+                  DropdownMenuItem(child: Text("Mongolia"), value: "MN"),
+                  DropdownMenuItem(child: Text("Afghanistan"), value: "AF"),
+                  DropdownMenuItem(child: Text("Iran"), value: "IR"),
+                  DropdownMenuItem(child: Text("Iraq"), value: "IQ"),
+                  DropdownMenuItem(child: Text("Syria"), value: "SY"),
+                  DropdownMenuItem(child: Text("Yemen"), value: "YE"),
+                  DropdownMenuItem(child: Text("Sudan"), value: "SD"),
+                  DropdownMenuItem(child: Text("Somalia"), value: "SO"),
+                  DropdownMenuItem(child: Text("Zambia"), value: "ZM"),
+                  DropdownMenuItem(child: Text("Uganda"), value: "UG"),
+                  DropdownMenuItem(child: Text("Madagascar"), value: "MG"),
+                  DropdownMenuItem(child: Text("Mozambique"), value: "MZ"),
+                  DropdownMenuItem(child: Text("Zimbabwe"), value: "ZW"),
+                  DropdownMenuItem(child: Text("Paraguay"), value: "PY"),
+                  DropdownMenuItem(child: Text("Bolivia"), value: "BO"),
+                  DropdownMenuItem(child: Text("Venezuela"), value: "VE"),
+                  DropdownMenuItem(child: Text("Uruguay"), value: "UY"),
+                  DropdownMenuItem(child: Text("Ecuador"), value: "EC"),
+                  DropdownMenuItem(child: Text("Honduras"), value: "HN"),
+                  DropdownMenuItem(child: Text("Guatemala"), value: "GT"),
+                  DropdownMenuItem(child: Text("Panama"), value: "PA"),
+                  DropdownMenuItem(child: Text("Costa Rica"), value: "CR"),
                 ],
                 onChanged: (value) {},
               ),
@@ -880,7 +1011,7 @@ class _UserHomeState extends State<UserHome> {
                   const Text("Save this card for future payments"),
                 ],
               ),
-              const SizedBox(height: 10),
+              // const SizedBox(height: 10),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
@@ -1084,7 +1215,7 @@ class _UserHomeState extends State<UserHome> {
                             foodName,
                             phoneNumber,
                             landmark,
-                              formattedDate, // Send current date & time
+                              formattedDate,
                           );
 
                         }
