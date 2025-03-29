@@ -668,14 +668,14 @@ class _UserHomeState extends State<UserHome> {
                           Text(
                             item['name'],
                             style: GoogleFonts.poppins(
-                              fontSize: 14, // Larger text
+                              fontSize: 10, // Larger text
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           Text(
                             "PKR${item['price']}",
                             style: GoogleFonts.poppins(
-                              fontSize: 16,
+                              fontSize: 12,
                               color: Colors.green,
                             ),
                           ),
