@@ -546,7 +546,7 @@ class _UserHomeState extends State<UserHome> {
         print("❤️ Added to favorites");
       }
 
-      _loadFavoriteItems(); // Refresh list
+      _loadFavoriteItems();
     }
 
 
