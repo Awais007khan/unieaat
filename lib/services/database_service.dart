@@ -233,18 +233,26 @@
       );
       return result.isNotEmpty ? result.first : null;
     }
-  
-  
-  
+
     Future<List<Map<String, dynamic>>> getUserOrders(int userId) async {
       final db = await database;
-      return await db.rawQuery('''
-      SELECT orders.*, food_items.name AS food_name, food_items.price 
-      FROM orders
-      JOIN food_items ON orders.foodItemId = food_items.id
-      WHERE orders.userId = ?
-    ''', [userId]);
+      return await db.query(
+        'orders',
+        where: 'userId = ?',
+        whereArgs: [userId],
+      );
     }
+
+
+    // Future<List<Map<String, dynamic>>> getUserOrders(int userId) async {
+    //   final db = await database;
+    //   return await db.rawQuery('''
+    //   SELECT orders.*, food_items.name AS food_name, food_items.price
+    //   FROM orders
+    //   JOIN food_items ON orders.foodItemId = food_items.id
+    //   WHERE orders.userId = ?
+    // ''', [userId]);
+    // }
     Future<String?> getUserName(String email) async {
       final db = await database;
       final List<Map<String, dynamic>> result = await db.query(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:unieaat/AdminHome.dart';
 import 'package:unieaat/UserHome.dart';
 import 'package:unieaat/services/database_service.dart';
@@ -53,7 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Image.asset('assets/logo.png', height: 100),
+              Lottie.asset('assets/okk.json', height: 300),
               const SizedBox(height: 20),
               const Text(
                 "Welcome to Foodie!",

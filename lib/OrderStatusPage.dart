@@ -22,10 +22,13 @@ class _OrderStatusPageState extends State<OrderStatusPage> {
     int userId = 1; // Replace with actual user ID
     final orders = await DatabaseHelper.instance.getUserOrders(userId);
 
+    print("Fetched Orders: $orders"); // Debugging log
+
     setState(() {
-      userOrders = List<Map<String, dynamic>>.from(orders); // Ensure deep copy
+      userOrders = List<Map<String, dynamic>>.from(orders);
     });
   }
+
 
 
   @override

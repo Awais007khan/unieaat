@@ -24,7 +24,7 @@ class _DatabaseDataScreenState extends State<DatabaseDataScreen> {
     users = await DatabaseHelper.instance.getFoodItems();
     orders = await DatabaseHelper.instance.getOrders();
     foodItems = await DatabaseHelper.instance.getFoodItems();
-    favorites = await DatabaseHelper.instance.getFavoriteItems(1); // Assuming user ID 1
+    favorites = await DatabaseHelper.instance.getFavoriteItems(1);
 
     setState(() {});
   }

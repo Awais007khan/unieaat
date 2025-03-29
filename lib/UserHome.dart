@@ -6,6 +6,7 @@ import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:unieaat/services/database_service.dart';
 import 'OrderStatusPage.dart';
@@ -361,7 +362,7 @@ class _UserHomeState extends State<UserHome> {
                     onChanged: _filterFoods,
                     decoration: InputDecoration(
                       hintText: "Search food...",
-                      prefixIcon: const Icon(Icons.search),
+                      prefixIcon: const Icon(Icons.search,color: Colors.grey),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -407,25 +408,25 @@ class _UserHomeState extends State<UserHome> {
       _buildBanner(
         "Food delivery",
         "Order food you love",
-        "assets/burger.png",
+        "assets/banner1.json",
         Colors.pink,
       ),
       _buildBanner(
         "Pick-Up",
-        "Everyday up to 25% off",
-        "assets/pasta.png",
+        "Everyday up to \n 25% off",
+        "assets/burger.json",
         Colors.brown,
       ),
       _buildBanner(
         "Shops",
         "Grocery & more..",
-        "assets/s.png",
+        "assets/food.json",
         Color(0xFF85C0FC),
       ),
       _buildBanner(
         "The Best",
         "Options of the day \n in your university",
-        "assets/banner_4.png",
+        "assets/okkkkkk.json",
         Color(0xFF044783),
       ),
     ];
@@ -477,12 +478,12 @@ class _UserHomeState extends State<UserHome> {
             ],
           ),
           ClipRRect(
-            borderRadius: BorderRadius.circular(50),
-            child: Image.asset(
+            borderRadius: BorderRadius.circular(100),
+            child: Lottie.asset(
               imagePath, // Image path passed dynamically
-              width: 80,
-              height: 80,
-              fit: BoxFit.cover,
+              width: 100,
+              height: 100,
+              fit: BoxFit.fill,
             ),
           ),
         ],
