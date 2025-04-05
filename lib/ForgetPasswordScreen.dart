@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:unieaat/services/database_service.dart';
+import 'package:UEEats/services/database_service.dart';
 
 class ForgetPasswordScreen extends StatefulWidget {
   const ForgetPasswordScreen({super.key});

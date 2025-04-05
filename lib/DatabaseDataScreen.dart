@@ -1,5 +1,6 @@
+import 'package:UEEats/services/database_service.dart';
 import 'package:flutter/material.dart';
-import 'package:unieaat/services/database_service.dart';
+
 
 class DatabaseDataScreen extends StatefulWidget {
   const DatabaseDataScreen({super.key});

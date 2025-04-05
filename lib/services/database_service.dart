@@ -83,12 +83,17 @@
 
 
       await db.execute('''
-        CREATE TABLE food_items (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT,
-          price REAL,
-          image TEXT
-        )
+  CREATE TABLE food_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    price REAL,
+    image TEXT,
+    category TEXT
+  )
+
+
+
+
       ''');
 
       await db.execute('''
@@ -398,11 +403,18 @@
         whereArgs: [userId, name],
       );
     }
-
-    Future<int> addFoodItem(String name, double price, String image) async {
+    Future<int> addFoodItem(String name, double price, String image, {required String category}) async {
       final db = await instance.database;
-      return await db.insert('food_items', {'name': name, 'price': price, 'image': image});
+      print('Inserting food item: $name, $price, $image, $category'); // 🟡 Debug line
+      return await db.insert('food_items', {
+        'name': name,
+        'price': price,
+        'image': image,
+        'category': category,
+      });
     }
+
+
 
 
 

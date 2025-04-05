@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'package:unieaat/AdminHome.dart';
-import 'package:unieaat/UserHome.dart';
-import 'package:unieaat/services/database_service.dart';
-import 'package:unieaat/signup_screen.dart';
+import 'package:UEEats/AdminHome.dart';
+import 'package:UEEats/UserHome.dart';
+import 'package:UEEats/services/database_service.dart';
+import 'package:UEEats/signup_screen.dart';
 import 'ForgetPasswordScreen.dart';
 
 class LoginScreen extends StatefulWidget {

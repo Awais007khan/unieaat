@@ -26,11 +26,19 @@ class _SplashScreenState extends State<SplashScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset('assets/logo.png', height: 200),
-
+            SizedBox(height: 20),  // Add some space between image and text
+            Text(
+              'UEEats',  // Your desired text
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,  // Adjust color as needed
+              ),
+            ),
           ],
         ),
       ),
     );
   }
+
 }
-  

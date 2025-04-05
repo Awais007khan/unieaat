@@ -2,13 +2,12 @@ import 'dart:io';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:unieaat/services/database_service.dart';
+import 'package:UEEats/services/database_service.dart';
 import 'OrderStatusPage.dart';
 import 'login_screen.dart';
 import 'package:intl/intl.dart';
@@ -29,6 +28,8 @@ class _UserHomeState extends State<UserHome> {
   List<Map<String, dynamic>> foodItems = [];
   List<Map<String, dynamic>> cartItems = [];
   List<Map<String, dynamic>> userOrders = [];
+  List<Map<String, dynamic>> allFoodItems = [];
+
   String selectedCategory = "";
   int _selectedIndex = 0;
   final TextEditingController searchController = TextEditingController();
@@ -45,9 +46,12 @@ class _UserHomeState extends State<UserHome> {
   List<Map<String, dynamic>> filteredFoodItems = [];
   @override
   void initState() {
+    print("Food Items: $foodItems");
+
     super.initState();
     printFavoritesTableSchema();
     _initializeData();
+    _loadAllFoods();
     _phoneController.addListener(() {
       setState(() {
         isPhoneValid = _phoneController.text.length >= 11;
@@ -265,13 +269,17 @@ class _UserHomeState extends State<UserHome> {
   ];
 
   Future<void> _loadFoodItems() async {
-    final item = await DatabaseHelper.instance.getFoodItems();
-    print("Loaded Food Items: $item");
+    final items = await DatabaseHelper.instance.getFoodItems();
+    print("LOADED ITEMS: $items");
 
     setState(() {
-      foodItems = item;
+      foodItems = items;
     });
+
+    print("Updated foodItems: $foodItems");
   }
+
+
   Future<void> _loadUserData() async {
     int userId = 1; // Replace this with actual logged-in user ID
     final user = await DatabaseHelper.instance.getUserById(userId);
@@ -323,27 +331,48 @@ class _UserHomeState extends State<UserHome> {
 
   }
 
-
+  Future<void> _loadAllFoods() async {
+    final items = await DatabaseHelper.instance.getFoodItems();
+    setState(() {
+      allFoodItems = items;
+      filteredFoodItems = items; // if needed for search
+    });
+  }
 
   Widget _buildFoodGrid() {
+
     List<Map<String, dynamic>> displayList;
+    print("Displaying Items: $foodItems");  // Debug print to check the list being passed
 
     if (searchController.text.isNotEmpty) {
       displayList = filteredFoodItems;
     }
     else if (selectedCategory == "Hamburger") {
       displayList = burgerList;
-    } else if (selectedCategory == "Pizza") {
+    }
+    else if (selectedCategory == "Pizza") {
       displayList = pizzaList;
-    } else if (selectedCategory == "Noodles") {
+    }
+    else if (selectedCategory == "Noodles") {
       displayList = noodlesList;
-    } else if (selectedCategory == "Meat") {
+    }
+    else if (selectedCategory == "Meat") {
       displayList = meatList;
-    } else if (selectedCategory == "Vegetables") {
+    }
+    else if (selectedCategory == "Vegetables") {
       displayList = vegetableList;
-    } else if (selectedCategory == "Dessert") {
+    }
+    else if (selectedCategory == "Dessert") {
       displayList = dessertList;
     }
+    else if (selectedCategory == "Others") {
+      displayList = foodItems.where((item) => item['category'] == 'Others').toList();
+      print("Filtered Food Items (Others): $displayList");
+
+    }
+
+
+
     else {
       displayList = getAllFoodItems();
     }
@@ -402,6 +431,191 @@ class _UserHomeState extends State<UserHome> {
       ],
     );
   }
+
+  Widget _buildFoodCard(Map<String, dynamic> item, bool isFavorite) {
+    print("Rendering Item: $item");  // Check if the item is correctly passed
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      elevation: 3,
+      child: Container(
+        height: 600, // Fixed height to prevent overflow
+        padding: const EdgeInsets.all(10.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Stack(
+                children: [
+                  GestureDetector(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: item['image'] != null && item['image'].startsWith('assets/')
+                          ? Image.asset(
+                        item['image'], // Directly use Image.asset for assets folder
+                        width: double.infinity,
+                        height: 100,
+                        fit: BoxFit.cover,
+                      )
+                          : Image.file(
+                        File(item['image']), // Only use File() for local storage paths
+                        width: double.infinity,
+                        height: 100,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                item['name'],
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                "Pkr ${item['price']}",
+                style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.star, color: Colors.orange, size: 18),
+                      const SizedBox(width: 5),
+                      Text(
+                        item['rating']?.toString() ?? "4.0",
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                      color: isFavorite ? Colors.red : Colors.grey,
+                    ),
+                    onPressed: () => _toggleFavorite(item),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Widget _buildFoodCard(Map<String, dynamic> item, bool isFavorite) {
+  //   print("Image URL: ${item['image']}");
+  //   print("Checking Image Path: ${item['image']}");
+  //   print("File Exists: ${File(item['image']).existsSync()}");
+  //   return Card(
+  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+  //     elevation: 3,
+  //     child: Container(
+  //       height: 600, // Fixed height to prevent overflow
+  //       padding: const EdgeInsets.all(10.0),
+  //       child: SingleChildScrollView(
+  //         child: Column(
+  //           crossAxisAlignment: CrossAxisAlignment.center,
+  //           children: [
+  //             Stack(
+  //               children: [
+  //                 GestureDetector(
+  //                   child:
+  //                   ClipRRect(
+  //                     borderRadius: BorderRadius.circular(12),
+  //                     child: item['image'] != null && item['image'].startsWith('assets/')
+  //                         ? Image.asset(
+  //                       item['image'], // Directly use Image.asset for assets folder
+  //                       width: double.infinity,
+  //                       height: 100,
+  //                       fit: BoxFit.cover,
+  //                     )
+  //                         : Image.file(
+  //                       File(item['image']), // Only use File() for local storage paths
+  //                       width: double.infinity,
+  //                       height: 100,
+  //                       fit: BoxFit.cover,
+  //                     ),
+  //                   ),
+  //
+  //                 ),
+  //                 Positioned(
+  //                   top: 8,
+  //                   right: 8,
+  //                   child: Container(
+  //                     decoration: BoxDecoration(
+  //                       color: Colors.red,
+  //                       shape: BoxShape.circle,
+  //                     ),
+  //                     child: IconButton(
+  //                       onPressed: () => _addToCart(item),
+  //                       icon: const Icon(
+  //                         Icons.add_shopping_cart,
+  //                         color: Colors.white,
+  //                       ),
+  //                       iconSize: 20,
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //             const SizedBox(height: 8),
+  //
+  //             Text(
+  //               item['name'],
+  //               style: GoogleFonts.poppins(
+  //                 fontSize: 16,
+  //                 fontWeight: FontWeight.bold,
+  //               ),
+  //             ),
+  //             Text(
+  //               "Pkr ${item['price']}",
+  //               style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey),
+  //             ),
+  //
+  //             const SizedBox(height: 8),
+  //
+  //             // 🟡 Rating & Favorite Button
+  //             Row(
+  //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //               children: [
+  //                 Row(
+  //                   children: [
+  //                     const Icon(Icons.star, color: Colors.orange, size: 18),
+  //                     const SizedBox(width: 5),
+  //                     Text(
+  //                       item['rating']?.toString() ?? "4.0",
+  //                       style: GoogleFonts.poppins(
+  //                         fontSize: 14,
+  //                         fontWeight: FontWeight.bold,
+  //                       ),
+  //                     ),
+  //                   ],
+  //                 ),
+  //                 IconButton(
+  //                   icon: Icon(
+  //                     isFavorite ? Icons.favorite : Icons.favorite_border,
+  //                     color: isFavorite ? Colors.red : Colors.grey,
+  //                   ),
+  //                   onPressed: () => _toggleFavorite(item),
+  //                 )
+  //
+  //               ],
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildFoodSlider() {
     final List<Widget> banners = [
@@ -499,6 +713,7 @@ class _UserHomeState extends State<UserHome> {
       {"icon": "🍖", "label": "Meat"},
       {"icon": "🥬", "label": "Vegetables"},
       {"icon": "🍰", "label": "Dessert"},
+      {"icon": "🧃", "label": "Others"},
     ];
 
     return GridView.builder(
@@ -698,111 +913,6 @@ class _UserHomeState extends State<UserHome> {
     );
   }
 
-  Widget _buildFoodCard(Map<String, dynamic> item, bool isFavorite) {
-      print("Image URL: ${item['image']}");
-      print("Checking Image Path: ${item['image']}");
-      print("File Exists: ${File(item['image']).existsSync()}");
-      return Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        elevation: 3,
-        child: Container(
-          height: 600, // Fixed height to prevent overflow
-          padding: const EdgeInsets.all(10.0),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Stack(
-                  children: [
-                    GestureDetector(
-                      child:
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: item['image'] != null && item['image'].startsWith('assets/')
-                            ? Image.asset(
-                          item['image'], // Directly use Image.asset for assets folder
-                          width: double.infinity,
-                          height: 100,
-                          fit: BoxFit.cover,
-                        )
-                            : Image.file(
-                          File(item['image']), // Only use File() for local storage paths
-                          width: double.infinity,
-                          height: 100,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-
-                    ),
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
-                        child: IconButton(
-                          onPressed: () => _addToCart(item),
-                          icon: const Icon(
-                            Icons.add_shopping_cart,
-                            color: Colors.white,
-                          ),
-                          iconSize: 20,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-
-                Text(
-                  item['name'],
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  "Pkr ${item['price']}",
-                  style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey),
-                ),
-
-                const SizedBox(height: 8),
-
-                // 🟡 Rating & Favorite Button
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.star, color: Colors.orange, size: 18),
-                        const SizedBox(width: 5),
-                        Text(
-                          item['rating']?.toString() ?? "4.0",
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        isFavorite ? Icons.favorite : Icons.favorite_border,
-                        color: isFavorite ? Colors.red : Colors.grey,
-                      ),
-                      onPressed: () => _toggleFavorite(item),
-                    )
-
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
   Future<void> printFavoritesTableSchema() async {
     final db = await DatabaseHelper.instance.database;
     List<Map<String, dynamic>> result = await db.rawQuery("PRAGMA table_info(favorites)");
@@ -1559,7 +1669,7 @@ class _UserHomeState extends State<UserHome> {
     return Scaffold(
       backgroundColor: Colors.amber.shade50,
       appBar: AppBar(
-        title: const Center(child: Text("UniEats 🍽️")),
+        title: const Center(child: Text("UEEats 🍽️")),
         backgroundColor: Colors.red,
         foregroundColor: Colors.white,
         automaticallyImplyLeading: false, // Removes the back button

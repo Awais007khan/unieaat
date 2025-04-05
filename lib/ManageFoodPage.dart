@@ -2,7 +2,7 @@
   import 'package:google_fonts/google_fonts.dart';
   import 'package:image_picker/image_picker.dart';
   import 'dart:io';
-  import 'package:unieaat/services/database_service.dart';
+  import 'package:UEEats/services/database_service.dart';
 
   class ManageFoodPage extends StatefulWidget {
     const ManageFoodPage({super.key});
@@ -34,20 +34,30 @@
         setState(() => _selectedImage = File(pickedFile.path));
       }
     }
-
     Future<void> _addFoodItem() async {
       final name = _nameController.text.trim();
       final price = double.tryParse(_priceController.text.trim()) ?? 0;
 
       if (name.isNotEmpty && price > 0 && _selectedImage != null) {
-        await DatabaseHelper.instance.addFoodItem(name, price, _selectedImage!.path);
+        await DatabaseHelper.instance.addFoodItem(
+          name,
+          price,
+          _selectedImage!.path,
+          category: "Others",
+        );
+
         _nameController.clear();
         _priceController.clear();
         setState(() => _selectedImage = null);
-        _loadFoodItems();
+
+        // Reload food items after adding a new one
+        _loadFoodItems();  // This will update the list of food items
         Navigator.pop(context);
       }
     }
+
+
+
 
     Future<void> _deleteFoodItem(int id) async {
       await DatabaseHelper.instance.deleteFoodItem(id);

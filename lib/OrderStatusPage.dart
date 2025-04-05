@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:unieaat/services/database_service.dart';
+import 'package:UEEats/services/database_service.dart';
 
 class OrderStatusPage extends StatefulWidget {
   const OrderStatusPage({super.key});
