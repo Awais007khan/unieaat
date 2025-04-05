@@ -26,13 +26,15 @@ class _SplashScreenState extends State<SplashScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset('assets/logo.png', height: 200),
-            SizedBox(height: 20),  // Add some space between image and text
+            SizedBox(height: 20),
             Text(
-              'UEEats',  // Your desired text
+              'UEEats',  // Text matching your logo
               style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,  // Adjust color as needed
+                fontSize: 32,               // Bigger size for logo feel
+                fontWeight: FontWeight.w900, // Boldest weight
+                color: Colors.white,         // White like your logo text
+                letterSpacing: 4,            // Space between letters
+                fontFamily: 'Sans',          // You can use a custom font here for exact match
               ),
             ),
           ],
@@ -40,5 +42,6 @@ class _SplashScreenState extends State<SplashScreen> {
       ),
     );
   }
+
 
 }
