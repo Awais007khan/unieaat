@@ -461,11 +461,32 @@ class _UserHomeState extends State<UserHome> {
                         width: double.infinity,
                         height: 100,
                         fit: BoxFit.cover,
+                    ),
+                    ),
+  
+                  ),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        onPressed: () => _addToCart(item),
+                        icon: const Icon(
+                          Icons.add_shopping_cart,
+                          color: Colors.white,
+                        ),
+                        iconSize: 20,
                       ),
                     ),
                   ),
                 ],
               ),
+              
+              
               const SizedBox(height: 8),
               Text(
                 item['name'],
