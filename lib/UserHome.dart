@@ -6,6 +6,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
+import 'package:paymob_pakistan/paymob_payment.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:UEEats/services/database_service.dart';
 import 'OrderStatusPage.dart';
@@ -1184,9 +1185,36 @@ class _UserHomeState extends State<UserHome> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.pop(context); // Close modal on payment
+                  onPressed: () async {
+                 final result = await PaymobPakistan.instance.initializePayment(
+                      currency: "PKR",
+                      amountInCents: (totalPrice * 100).toStringAsFixed(0),
+                    );
+
+                    // Second step: Make Payment
+                    await PaymobPakistan.instance.makePayment(
+                        context,
+                        currency: "PKR",
+                        amountInCents: (totalPrice * 100).toStringAsFixed(0),
+                        paymentType: PaymentType.easypaisa,
+                        authToken: result.authToken,
+                        orderID: result.orderID,
+                        billingData: PaymobBillingData(
+                          phoneNumber: "03205665465",
+                        ),
+                        onPayment: (response) {
+                          if (response.success) {
+                            // Payment Success
+                            print('Payment successful: ${response.message}');
+                          } else {
+                            // Payment Failed
+                            print('Payment failed: ${response.message}');
+                          }
+                        }
+                    );
+
                   },
+
                   icon: const Icon(Icons.lock),
                   label: Text(
                     "Pay PKR ${totalPrice.toStringAsFixed(2)}",
@@ -1747,4 +1775,6 @@ class _UserHomeState extends State<UserHome> {
       ),
     );
   }
+
+
 }

@@ -5,6 +5,7 @@ import 'package:UEEats/UserHome.dart';
 import 'package:UEEats/services/database_service.dart';
 import 'package:UEEats/signup_screen.dart';
 import 'ForgetPasswordScreen.dart';
+import 'SuperAdminDashboard.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,10 +20,41 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isLoading = false;
   bool isPasswordVisible = false;
 
+  // Future<void> loginUser() async {
+  //   setState(() => isLoading = true);
+  //   String email = emailController.text.trim();
+  //   String password = passwordController.text.trim();
+  //
+  //   var user = await DatabaseHelper.instance.getUser(email, password);
+  //   setState(() => isLoading = false);
+  //
+  //   if (user != null) {
+  //     String role = user['role'];
+  //     if (role == 'admin') {
+  //       Navigator.pushReplacement(
+  //           context, MaterialPageRoute(builder: (_) => const AdminHome()));
+  //     } else {
+  //       Navigator.pushReplacement(
+  //           context, MaterialPageRoute(builder: (_) => UserHome()));
+  //     }
+  //   } else {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text('Invalid email or password')),
+  //     );
+  //   }
+  // }
   Future<void> loginUser() async {
     setState(() => isLoading = true);
     String email = emailController.text.trim();
     String password = passwordController.text.trim();
+
+    // 🔐 Super Admin Login Check
+    if (email == 'superadmin@gmail.com' && password == '1234567') {
+      setState(() => isLoading = false);
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (_) => const SuperAdminDashboard()));
+      return;
+    }
 
     var user = await DatabaseHelper.instance.getUser(email, password);
     setState(() => isLoading = false);
