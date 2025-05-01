@@ -48,7 +48,6 @@ class _LoginScreenState extends State<LoginScreen> {
     String email = emailController.text.trim();
     String password = passwordController.text.trim();
 
-    // 🔐 Super Admin Login Check
     if (email == 'superadmin@gmail.com' && password == '1234567') {
       setState(() => isLoading = false);
       Navigator.pushReplacement(
