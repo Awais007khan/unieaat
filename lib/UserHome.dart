@@ -12,6 +12,7 @@ import 'package:UEEats/services/database_service.dart';
 import 'OrderStatusPage.dart';
 import 'login_screen.dart';
 import 'package:intl/intl.dart';
+
 class UserHome extends StatefulWidget {
   const UserHome({super.key});
 
@@ -39,8 +40,7 @@ class _UserHomeState extends State<UserHome> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _landmarkController = TextEditingController();
 
-  TextEditingController _addressController =
-  TextEditingController();
+  TextEditingController _addressController = TextEditingController();
   bool isPhoneValid = true;
 
   List<Map<String, dynamic>> favoriteItems = [];
@@ -57,12 +57,14 @@ class _UserHomeState extends State<UserHome> {
       setState(() {
         isPhoneValid = _phoneController.text.length >= 11;
       });
-    });// Call async function without awaiting
+    }); // Call async function without awaiting
   }
 
   void _initializeData() async {
     final db = await DatabaseHelper.instance.database;
-    List<Map<String, dynamic>> columns = await db.rawQuery("PRAGMA table_info(food_items);");
+    List<Map<String, dynamic>> columns = await db.rawQuery(
+      "PRAGMA table_info(food_items);",
+    );
     print(columns);
     await _loadFoodItems();
     await _loadUserData();
@@ -71,8 +73,6 @@ class _UserHomeState extends State<UserHome> {
       filteredFoodItems = List.from(foodItems);
     });
   }
-
-
 
   void addInitialFoodData() async {
     final dbHelper = DatabaseHelper.instance;
@@ -88,6 +88,7 @@ class _UserHomeState extends State<UserHome> {
 
     print("Food items inserted successfully!");
   }
+
   List<Map<String, dynamic>> burgerList = [
     {
       "id": 5,
@@ -240,7 +241,7 @@ class _UserHomeState extends State<UserHome> {
   ];
   List<Map<String, dynamic>> dessertList = [
     {
-      "id": 1,  // ✅ Unique ID
+      "id": 1, // ✅ Unique ID
       "name": "Chocolate Cake",
       "restaurant": "Sweet Treats",
       "price": 50,
@@ -280,7 +281,6 @@ class _UserHomeState extends State<UserHome> {
     print("Updated foodItems: $foodItems");
   }
 
-
   Future<void> _loadUserData() async {
     int userId = 1; // Replace this with actual logged-in user ID
     final user = await DatabaseHelper.instance.getUserById(userId);
@@ -298,6 +298,7 @@ class _UserHomeState extends State<UserHome> {
       print("User not found in database!");
     }
   }
+
   List<Map<String, dynamic>> getAllFoodItems() {
     return [
       ...burgerList,
@@ -317,11 +318,13 @@ class _UserHomeState extends State<UserHome> {
   void _filterFoods(String query) {
     setState(() {
       if (query.isEmpty) {
-        filteredFoodItems = getAllFoodItems(); // Show all food items if search is empty
+        filteredFoodItems =
+            getAllFoodItems(); // Show all food items if search is empty
       } else {
-        filteredFoodItems = getAllFoodItems().where((item) {
-          return item['name'].toLowerCase().contains(query.toLowerCase());
-        }).toList();
+        filteredFoodItems =
+            getAllFoodItems().where((item) {
+              return item['name'].toLowerCase().contains(query.toLowerCase());
+            }).toList();
       }
     });
     setState(() {
@@ -329,7 +332,6 @@ class _UserHomeState extends State<UserHome> {
     });
 
     print("Filtered Food Items: $filteredFoodItems");
-
   }
 
   Future<void> _loadAllFoods() async {
@@ -341,40 +343,30 @@ class _UserHomeState extends State<UserHome> {
   }
 
   Widget _buildFoodGrid() {
-
     List<Map<String, dynamic>> displayList;
-    print("Displaying Items: $foodItems");  // Debug print to check the list being passed
+    print(
+      "Displaying Items: $foodItems",
+    ); // Debug print to check the list being passed
 
     if (searchController.text.isNotEmpty) {
       displayList = filteredFoodItems;
-    }
-    else if (selectedCategory == "Hamburger") {
+    } else if (selectedCategory == "Hamburger") {
       displayList = burgerList;
-    }
-    else if (selectedCategory == "Pizza") {
+    } else if (selectedCategory == "Pizza") {
       displayList = pizzaList;
-    }
-    else if (selectedCategory == "Noodles") {
+    } else if (selectedCategory == "Noodles") {
       displayList = noodlesList;
-    }
-    else if (selectedCategory == "Meat") {
+    } else if (selectedCategory == "Meat") {
       displayList = meatList;
-    }
-    else if (selectedCategory == "Vegetables") {
+    } else if (selectedCategory == "Vegetables") {
       displayList = vegetableList;
-    }
-    else if (selectedCategory == "Dessert") {
+    } else if (selectedCategory == "Dessert") {
       displayList = dessertList;
-    }
-    else if (selectedCategory == "Others") {
-      displayList = foodItems.where((item) => item['category'] == 'Others').toList();
+    } else if (selectedCategory == "Others") {
+      displayList =
+          foodItems.where((item) => item['category'] == 'Others').toList();
       print("Filtered Food Items (Others): $displayList");
-
-    }
-
-
-
-    else {
+    } else {
       displayList = getAllFoodItems();
     }
 
@@ -392,7 +384,7 @@ class _UserHomeState extends State<UserHome> {
                     onChanged: _filterFoods,
                     decoration: InputDecoration(
                       hintText: "Search food...",
-                      prefixIcon: const Icon(Icons.search,color: Colors.grey),
+                      prefixIcon: const Icon(Icons.search, color: Colors.grey),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -420,7 +412,7 @@ class _UserHomeState extends State<UserHome> {
                   itemBuilder: (context, index) {
                     final item = displayList[index];
                     bool isFavorite = favoriteItems.any(
-                          (fav) => fav['name'] == item['name'],
+                      (fav) => fav['name'] == item['name'],
                     );
                     return _buildFoodCard(item, isFavorite);
                   },
@@ -434,7 +426,7 @@ class _UserHomeState extends State<UserHome> {
   }
 
   Widget _buildFoodCard(Map<String, dynamic> item, bool isFavorite) {
-    print("Rendering Item: $item");  // Check if the item is correctly passed
+    print("Rendering Item: $item"); // Check if the item is correctly passed
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       elevation: 3,
@@ -450,21 +442,24 @@ class _UserHomeState extends State<UserHome> {
                   GestureDetector(
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(12),
-                      child: item['image'] != null && item['image'].startsWith('assets/')
-                          ? Image.asset(
-                        item['image'], // Directly use Image.asset for assets folder
-                        width: double.infinity,
-                        height: 100,
-                        fit: BoxFit.cover,
-                      )
-                          : Image.file(
-                        File(item['image']), // Only use File() for local storage paths
-                        width: double.infinity,
-                        height: 100,
-                        fit: BoxFit.cover,
+                      child:
+                          item['image'] != null &&
+                                  item['image'].startsWith('assets/')
+                              ? Image.asset(
+                                item['image'], // Directly use Image.asset for assets folder
+                                width: double.infinity,
+                                height: 100,
+                                fit: BoxFit.cover,
+                              )
+                              : Image.file(
+                                File(
+                                  item['image'],
+                                ), // Only use File() for local storage paths
+                                width: double.infinity,
+                                height: 100,
+                                fit: BoxFit.cover,
+                              ),
                     ),
-                    ),
-  
                   ),
                   Positioned(
                     top: 8,
@@ -486,8 +481,7 @@ class _UserHomeState extends State<UserHome> {
                   ),
                 ],
               ),
-              
-              
+
               const SizedBox(height: 8),
               Text(
                 item['name'],
@@ -678,13 +672,13 @@ class _UserHomeState extends State<UserHome> {
       items: banners,
     );
   }
+
   Widget _buildBanner(
     String title,
     String subtitle,
     String imagePath,
     Color bgColor,
-  )
-  {
+  ) {
     return Container(
       margin: const EdgeInsets.all(12),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
@@ -787,164 +781,165 @@ class _UserHomeState extends State<UserHome> {
   }
 
   Future<void> _toggleFavorite(Map<String, dynamic> item) async {
-      print("DEBUG: Item Data => $item");
+    print("DEBUG: Item Data => $item");
 
-      if (!item.containsKey('id')) {
-        item['id'] = DateTime.now().millisecondsSinceEpoch; // ✅ Assign unique ID if missing
-      }
-
-      int foodId = item['id'];
-      int userId = 1; // Actual user ID add karo
-
-      bool isFav = favoriteItems.any((fav) => fav['id'] == foodId);
-
-      if (isFav) {
-        await DatabaseHelper.instance.removeFromFavorites(item['food_id'], userId!);
-        print("✅ Removed from favorites");
-      } else {
-        await DatabaseHelper.instance.addToFavorites(
-            userId,
-            foodId,
-            item['name'],
-            item['image'],
-            item['price']
-        );
-        print("❤️ Added to favorites");
-      }
-
-      _loadFavoriteItems();
+    if (!item.containsKey('id')) {
+      item['id'] =
+          DateTime.now()
+              .millisecondsSinceEpoch; // ✅ Assign unique ID if missing
     }
 
+    int foodId = item['id'];
+    int userId = 1; // Actual user ID add karo
+
+    bool isFav = favoriteItems.any((fav) => fav['id'] == foodId);
+
+    if (isFav) {
+      await DatabaseHelper.instance.removeFromFavorites(
+        item['food_id'],
+        userId!,
+      );
+      print("✅ Removed from favorites");
+    } else {
+      await DatabaseHelper.instance.addToFavorites(
+        userId,
+        foodId,
+        item['name'],
+        item['image'],
+        item['price'],
+      );
+      print("❤️ Added to favorites");
+    }
+
+    _loadFavoriteItems();
+  }
 
   Widget _buildFavoritesPage() {
     return favoriteItems.isEmpty
         ? const Center(
-      child: Text("No favorites added yet", style: TextStyle(fontSize: 18)),
-    )
+          child: Text("No favorites added yet", style: TextStyle(fontSize: 18)),
+        )
         : GridView.builder(
-      padding: const EdgeInsets.all(12.0),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 15,
-        mainAxisSpacing: 15,
-        childAspectRatio: 0.75,
-      ),
-      itemCount: favoriteItems.length, // ✅ Use favoriteItems
-      itemBuilder: (context, index) {
-        final item = favoriteItems[index]; // ✅ Use favoriteItems
-        return
-          SizedBox(
-            width: double.infinity, // Makes Card take full available width
-            child: Card(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-              elevation: 3,
-              child: Container(
-                height: 900, // Fixed height
-                padding: const EdgeInsets.all(10.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Stack to position delete & cart buttons
-                    Stack(
-                      children: [
-                        // Circular Image
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(100),
-                          child: Image.asset(
-                            item['image'],
-                            width: double.infinity,
-                            height: 120, // Increased size
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-
-                        // Add to Cart Button (Top Right)
-                        Positioned(
-                          top: 8,
-                          right: 3,
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                            ),
-                            child: IconButton(
-                              onPressed: () => _addToCart(item),
-                              icon: const Icon(
-                                Icons.add_shopping_cart,
-                                color: Colors.white,
-                              ),
-                              iconSize: 24,
-                            ),
-                          ),
-                        ),
-
-                        // Delete Button (Top Left)
-                        Positioned(
-                          top: 8,
-                          left: 3,
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                            ),
-                            child: IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () => _toggleFavorite(item),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    // Content Section
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
+          padding: const EdgeInsets.all(12.0),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 15,
+            mainAxisSpacing: 15,
+            childAspectRatio: 0.75,
+          ),
+          itemCount: favoriteItems.length, // ✅ Use favoriteItems
+          itemBuilder: (context, index) {
+            final item = favoriteItems[index]; // ✅ Use favoriteItems
+            return SizedBox(
+              width: double.infinity, // Makes Card take full available width
+              child: Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                elevation: 3,
+                child: Container(
+                  height: 900, // Fixed height
+                  padding: const EdgeInsets.all(10.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Stack to position delete & cart buttons
+                      Stack(
                         children: [
-                          Text(
-                            item['name'],
-                            style: GoogleFonts.poppins(
-                              fontSize: 10, // Larger text
-                              fontWeight: FontWeight.bold,
+                          // Circular Image
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(100),
+                            child: Image.asset(
+                              item['image'],
+                              width: double.infinity,
+                              height: 120, // Increased size
+                              fit: BoxFit.cover,
                             ),
                           ),
-                          Text(
-                            "PKR${item['price']}",
-                            style: GoogleFonts.poppins(
-                              fontSize: 12,
-                              color: Colors.green,
+
+                          // Add to Cart Button (Top Right)
+                          Positioned(
+                            top: 8,
+                            right: 3,
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                              ),
+                              child: IconButton(
+                                onPressed: () => _addToCart(item),
+                                icon: const Icon(
+                                  Icons.add_shopping_cart,
+                                  color: Colors.white,
+                                ),
+                                iconSize: 24,
+                              ),
+                            ),
+                          ),
+
+                          // Delete Button (Top Left)
+                          Positioned(
+                            top: 8,
+                            left: 3,
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                              ),
+                              child: IconButton(
+                                icon: const Icon(
+                                  Icons.delete,
+                                  color: Colors.red,
+                                ),
+                                onPressed: () => _toggleFavorite(item),
+                              ),
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
+
+                      // Content Section
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              item['name'],
+                              style: GoogleFonts.poppins(
+                                fontSize: 10, // Larger text
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              "PKR${item['price']}",
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                color: Colors.green,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          );
-
-
-
-
-
-
-
-      },
-    );
+            );
+          },
+        );
   }
 
   Future<void> printFavoritesTableSchema() async {
     final db = await DatabaseHelper.instance.database;
-    List<Map<String, dynamic>> result = await db.rawQuery("PRAGMA table_info(favorites)");
+    List<Map<String, dynamic>> result = await db.rawQuery(
+      "PRAGMA table_info(favorites)",
+    );
 
     for (var column in result) {
       print("Column: ${column['name']} | Type: ${column['type']}");
     }
   }
-
-
 
   void _addToCart(Map<String, dynamic> item) {
     setState(() {
@@ -961,271 +956,389 @@ class _UserHomeState extends State<UserHome> {
   }
 
   Future<int> placeOrder(
-      int userId,
-      int foodItemId,
-      int quantity,
-      double totalPrice,
-      String address,
-      String paymentMethod,
-      String foodName,
-      String phoneNumber,
-      String landmark,
-      String timestamp) async {
+    int userId,
+    int foodItemId,
+    int quantity,
+    double totalPrice,
+    String address,
+    String paymentMethod,
+    String foodName,
+    String phoneNumber,
+    String landmark,
+    String timestamp,
+  ) async {
+    final db =
+        await DatabaseHelper
+            .instance
+            .database; // Ensure the database is fetched correctly
 
-    final db = await DatabaseHelper.instance.database; // Ensure the database is fetched correctly
-
-    return await db.insert(
-      'orders',
-      {
-        'userId': userId,
-        'foodItemId': foodItemId,
-        'foodName': foodName,
-        'quantity': quantity,
-        'totalPrice': totalPrice,
-        'address': address,
-        'phoneNumber': phoneNumber,
-        'landmark': landmark,
-        'status': 'Processing',
-        'paymentMethod': paymentMethod,
-        'timestamp': timestamp,
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    return await db.insert('orders', {
+      'userId': userId,
+      'foodItemId': foodItemId,
+      'foodName': foodName,
+      'quantity': quantity,
+      'totalPrice': totalPrice,
+      'address': address,
+      'phoneNumber': phoneNumber,
+      'landmark': landmark,
+      'status': 'Processing',
+      'paymentMethod': paymentMethod,
+      'timestamp': timestamp,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-
+  final List<DropdownMenuItem<String>> countryDropdownItems = [
+    DropdownMenuItem(child: Text("Pakistan"), value: "PK"),
+    DropdownMenuItem(child: Text("United States"), value: "US"),
+    DropdownMenuItem(child: Text("Canada"), value: "CA"),
+    DropdownMenuItem(child: Text("United Kingdom"), value: "GB"),
+    DropdownMenuItem(child: Text("Australia"), value: "AU"),
+    DropdownMenuItem(child: Text("Germany"), value: "DE"),
+    DropdownMenuItem(child: Text("France"), value: "FR"),
+    DropdownMenuItem(child: Text("Italy"), value: "IT"),
+    DropdownMenuItem(child: Text("Spain"), value: "ES"),
+    DropdownMenuItem(child: Text("Netherlands"), value: "NL"),
+    DropdownMenuItem(child: Text("Switzerland"), value: "CH"),
+    DropdownMenuItem(child: Text("Sweden"), value: "SE"),
+    DropdownMenuItem(child: Text("Norway"), value: "NO"),
+    DropdownMenuItem(child: Text("Denmark"), value: "DK"),
+    DropdownMenuItem(child: Text("Finland"), value: "FI"),
+    DropdownMenuItem(child: Text("Japan"), value: "JP"),
+    DropdownMenuItem(child: Text("South Korea"), value: "KR"),
+    DropdownMenuItem(child: Text("China"), value: "CN"),
+    DropdownMenuItem(child: Text("India"), value: "IN"),
+    DropdownMenuItem(child: Text("Brazil"), value: "BR"),
+    DropdownMenuItem(child: Text("Mexico"), value: "MX"),
+    DropdownMenuItem(child: Text("Argentina"), value: "AR"),
+    DropdownMenuItem(child: Text("Colombia"), value: "CO"),
+    DropdownMenuItem(child: Text("Chile"), value: "CL"),
+    DropdownMenuItem(child: Text("Peru"), value: "PE"),
+    DropdownMenuItem(child: Text("South Africa"), value: "ZA"),
+    DropdownMenuItem(child: Text("Nigeria"), value: "NG"),
+    DropdownMenuItem(child: Text("Egypt"), value: "EG"),
+    DropdownMenuItem(child: Text("Turkey"), value: "TR"),
+    DropdownMenuItem(child: Text("Saudi Arabia"), value: "SA"),
+    DropdownMenuItem(child: Text("United Arab Emirates"), value: "AE"),
+    DropdownMenuItem(child: Text("Malaysia"), value: "MY"),
+    DropdownMenuItem(child: Text("Singapore"), value: "SG"),
+    DropdownMenuItem(child: Text("Thailand"), value: "TH"),
+    DropdownMenuItem(child: Text("Vietnam"), value: "VN"),
+    DropdownMenuItem(child: Text("Indonesia"), value: "ID"),
+    DropdownMenuItem(child: Text("Philippines"), value: "PH"),
+    DropdownMenuItem(child: Text("New Zealand"), value: "NZ"),
+    DropdownMenuItem(child: Text("Russia"), value: "RU"),
+    DropdownMenuItem(child: Text("Ukraine"), value: "UA"),
+    DropdownMenuItem(child: Text("Poland"), value: "PL"),
+    DropdownMenuItem(child: Text("Czech Republic"), value: "CZ"),
+    DropdownMenuItem(child: Text("Hungary"), value: "HU"),
+    DropdownMenuItem(child: Text("Greece"), value: "GR"),
+    DropdownMenuItem(child: Text("Portugal"), value: "PT"),
+    DropdownMenuItem(child: Text("Belgium"), value: "BE"),
+    DropdownMenuItem(child: Text("Austria"), value: "AT"),
+    DropdownMenuItem(child: Text("Romania"), value: "RO"),
+    DropdownMenuItem(child: Text("Bulgaria"), value: "BG"),
+    DropdownMenuItem(child: Text("Serbia"), value: "RS"),
+    DropdownMenuItem(child: Text("Croatia"), value: "HR"),
+    DropdownMenuItem(child: Text("Slovakia"), value: "SK"),
+    DropdownMenuItem(child: Text("Slovenia"), value: "SI"),
+    DropdownMenuItem(child: Text("Lithuania"), value: "LT"),
+    DropdownMenuItem(child: Text("Latvia"), value: "LV"),
+    DropdownMenuItem(child: Text("Estonia"), value: "EE"),
+    DropdownMenuItem(child: Text("Kazakhstan"), value: "KZ"),
+    DropdownMenuItem(child: Text("Uzbekistan"), value: "UZ"),
+    DropdownMenuItem(child: Text("Qatar"), value: "QA"),
+    DropdownMenuItem(child: Text("Bahrain"), value: "BH"),
+    DropdownMenuItem(child: Text("Kuwait"), value: "KW"),
+    DropdownMenuItem(child: Text("Oman"), value: "OM"),
+    DropdownMenuItem(child: Text("Lebanon"), value: "LB"),
+    DropdownMenuItem(child: Text("Jordan"), value: "JO"),
+    DropdownMenuItem(child: Text("Israel"), value: "IL"),
+    DropdownMenuItem(child: Text("Morocco"), value: "MA"),
+    DropdownMenuItem(child: Text("Algeria"), value: "DZ"),
+    DropdownMenuItem(child: Text("Tunisia"), value: "TN"),
+    DropdownMenuItem(child: Text("Ethiopia"), value: "ET"),
+    DropdownMenuItem(child: Text("Kenya"), value: "KE"),
+    DropdownMenuItem(child: Text("Ghana"), value: "GH"),
+    DropdownMenuItem(child: Text("Ivory Coast"), value: "CI"),
+    DropdownMenuItem(child: Text("Senegal"), value: "SN"),
+    DropdownMenuItem(child: Text("Bangladesh"), value: "BD"),
+    DropdownMenuItem(child: Text("Sri Lanka"), value: "LK"),
+    DropdownMenuItem(child: Text("Myanmar"), value: "MM"),
+    DropdownMenuItem(child: Text("Nepal"), value: "NP"),
+    DropdownMenuItem(child: Text("Bhutan"), value: "BT"),
+    DropdownMenuItem(child: Text("Mongolia"), value: "MN"),
+    DropdownMenuItem(child: Text("Afghanistan"), value: "AF"),
+    DropdownMenuItem(child: Text("Iran"), value: "IR"),
+    DropdownMenuItem(child: Text("Iraq"), value: "IQ"),
+    DropdownMenuItem(child: Text("Syria"), value: "SY"),
+    DropdownMenuItem(child: Text("Yemen"), value: "YE"),
+    DropdownMenuItem(child: Text("Sudan"), value: "SD"),
+    DropdownMenuItem(child: Text("Somalia"), value: "SO"),
+    DropdownMenuItem(child: Text("Zambia"), value: "ZM"),
+    DropdownMenuItem(child: Text("Uganda"), value: "UG"),
+    DropdownMenuItem(child: Text("Madagascar"), value: "MG"),
+    DropdownMenuItem(child: Text("Mozambique"), value: "MZ"),
+    DropdownMenuItem(child: Text("Zimbabwe"), value: "ZW"),
+    DropdownMenuItem(child: Text("Paraguay"), value: "PY"),
+    DropdownMenuItem(child: Text("Bolivia"), value: "BO"),
+    DropdownMenuItem(child: Text("Venezuela"), value: "VE"),
+    DropdownMenuItem(child: Text("Uruguay"), value: "UY"),
+    DropdownMenuItem(child: Text("Ecuador"), value: "EC"),
+    DropdownMenuItem(child: Text("Honduras"), value: "HN"),
+    DropdownMenuItem(child: Text("Guatemala"), value: "GT"),
+    DropdownMenuItem(child: Text("Panama"), value: "PA"),
+    DropdownMenuItem(child: Text("Costa Rica"), value: "CR"),
+  ];
 
   Future<void> showPaymentBottomSheet(BuildContext context) async {
-    double totalPrice = cartItems.fold(
-      0,
-      (sum, item) => sum + item['price'],
-    ); // Calculate total price
+    double totalPrice = cartItems.fold(0, (sum, item) => sum + item['price']);
 
     return showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
       ),
+      isScrollControlled: true,
       builder: (context) {
         return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Card information",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              const TextField(
-                decoration: InputDecoration(
-                  labelText: "Card number",
-                  border: OutlineInputBorder(),
-                  suffixIcon: Icon(Icons.credit_card),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            left: 16,
+            right: 16,
+            top: 16,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Card Information",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: const TextField(
-                      decoration: InputDecoration(
-                        labelText: "MM / YY",
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                    ),
+                const SizedBox(height: 8),
+                const TextField(
+                  decoration: InputDecoration(
+                    labelText: "Card Number",
+                    border: OutlineInputBorder(),
+                    suffixIcon: Icon(Icons.credit_card),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: const TextField(
-                      decoration: InputDecoration(
-                        labelText: "CVC",
-                        border: OutlineInputBorder(),
-                        suffixIcon: Icon(Icons.lock),
-                      ),
-                      keyboardType: TextInputType.number,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              DropdownButtonFormField<String>(
-                decoration: const InputDecoration(
-                  labelText: "Country or region",
-                  border: OutlineInputBorder(),
+                  keyboardType: TextInputType.number,
                 ),
-                items: const [
-                  DropdownMenuItem(child: Text("Pakistan"), value: "PK"),
-                  DropdownMenuItem(child: Text("United States"), value: "US"),
-                  DropdownMenuItem(child: Text("Canada"), value: "CA"),
-                  DropdownMenuItem(child: Text("United Kingdom"), value: "GB"),
-                  DropdownMenuItem(child: Text("Australia"), value: "AU"),
-                  DropdownMenuItem(child: Text("Germany"), value: "DE"),
-                  DropdownMenuItem(child: Text("France"), value: "FR"),
-                  DropdownMenuItem(child: Text("Italy"), value: "IT"),
-                  DropdownMenuItem(child: Text("Spain"), value: "ES"),
-                  DropdownMenuItem(child: Text("Netherlands"), value: "NL"),
-                  DropdownMenuItem(child: Text("Switzerland"), value: "CH"),
-                  DropdownMenuItem(child: Text("Sweden"), value: "SE"),
-                  DropdownMenuItem(child: Text("Norway"), value: "NO"),
-                  DropdownMenuItem(child: Text("Denmark"), value: "DK"),
-                  DropdownMenuItem(child: Text("Finland"), value: "FI"),
-                  DropdownMenuItem(child: Text("Japan"), value: "JP"),
-                  DropdownMenuItem(child: Text("South Korea"), value: "KR"),
-                  DropdownMenuItem(child: Text("China"), value: "CN"),
-                  DropdownMenuItem(child: Text("India"), value: "IN"),
-                  DropdownMenuItem(child: Text("Brazil"), value: "BR"),
-                  DropdownMenuItem(child: Text("Mexico"), value: "MX"),
-                  DropdownMenuItem(child: Text("Argentina"), value: "AR"),
-                  DropdownMenuItem(child: Text("Colombia"), value: "CO"),
-                  DropdownMenuItem(child: Text("Chile"), value: "CL"),
-                  DropdownMenuItem(child: Text("Peru"), value: "PE"),
-                  DropdownMenuItem(child: Text("South Africa"), value: "ZA"),
-                  DropdownMenuItem(child: Text("Nigeria"), value: "NG"),
-                  DropdownMenuItem(child: Text("Egypt"), value: "EG"),
-                  DropdownMenuItem(child: Text("Turkey"), value: "TR"),
-                  DropdownMenuItem(child: Text("Saudi Arabia"), value: "SA"),
-                  DropdownMenuItem(child: Text("United Arab Emirates"), value: "AE"),
-                  DropdownMenuItem(child: Text("Malaysia"), value: "MY"),
-                  DropdownMenuItem(child: Text("Singapore"), value: "SG"),
-                  DropdownMenuItem(child: Text("Thailand"), value: "TH"),
-                  DropdownMenuItem(child: Text("Vietnam"), value: "VN"),
-                  DropdownMenuItem(child: Text("Indonesia"), value: "ID"),
-                  DropdownMenuItem(child: Text("Philippines"), value: "PH"),
-                  DropdownMenuItem(child: Text("New Zealand"), value: "NZ"),
-                  DropdownMenuItem(child: Text("Russia"), value: "RU"),
-                  DropdownMenuItem(child: Text("Ukraine"), value: "UA"),
-                  DropdownMenuItem(child: Text("Poland"), value: "PL"),
-                  DropdownMenuItem(child: Text("Czech Republic"), value: "CZ"),
-                  DropdownMenuItem(child: Text("Hungary"), value: "HU"),
-                  DropdownMenuItem(child: Text("Greece"), value: "GR"),
-                  DropdownMenuItem(child: Text("Portugal"), value: "PT"),
-                  DropdownMenuItem(child: Text("Belgium"), value: "BE"),
-                  DropdownMenuItem(child: Text("Austria"), value: "AT"),
-                  DropdownMenuItem(child: Text("Romania"), value: "RO"),
-                  DropdownMenuItem(child: Text("Bulgaria"), value: "BG"),
-                  DropdownMenuItem(child: Text("Serbia"), value: "RS"),
-                  DropdownMenuItem(child: Text("Croatia"), value: "HR"),
-                  DropdownMenuItem(child: Text("Slovakia"), value: "SK"),
-                  DropdownMenuItem(child: Text("Slovenia"), value: "SI"),
-                  DropdownMenuItem(child: Text("Lithuania"), value: "LT"),
-                  DropdownMenuItem(child: Text("Latvia"), value: "LV"),
-                  DropdownMenuItem(child: Text("Estonia"), value: "EE"),
-                  DropdownMenuItem(child: Text("Kazakhstan"), value: "KZ"),
-                  DropdownMenuItem(child: Text("Uzbekistan"), value: "UZ"),
-                  DropdownMenuItem(child: Text("Qatar"), value: "QA"),
-                  DropdownMenuItem(child: Text("Bahrain"), value: "BH"),
-                  DropdownMenuItem(child: Text("Kuwait"), value: "KW"),
-                  DropdownMenuItem(child: Text("Oman"), value: "OM"),
-                  DropdownMenuItem(child: Text("Lebanon"), value: "LB"),
-                  DropdownMenuItem(child: Text("Jordan"), value: "JO"),
-                  DropdownMenuItem(child: Text("Israel"), value: "IL"),
-                  DropdownMenuItem(child: Text("Morocco"), value: "MA"),
-                  DropdownMenuItem(child: Text("Algeria"), value: "DZ"),
-                  DropdownMenuItem(child: Text("Tunisia"), value: "TN"),
-                  DropdownMenuItem(child: Text("Ethiopia"), value: "ET"),
-                  DropdownMenuItem(child: Text("Kenya"), value: "KE"),
-                  DropdownMenuItem(child: Text("Ghana"), value: "GH"),
-                  DropdownMenuItem(child: Text("Ivory Coast"), value: "CI"),
-                  DropdownMenuItem(child: Text("Senegal"), value: "SN"),
-                  DropdownMenuItem(child: Text("Bangladesh"), value: "BD"),
-                  DropdownMenuItem(child: Text("Sri Lanka"), value: "LK"),
-                  DropdownMenuItem(child: Text("Myanmar"), value: "MM"),
-                  DropdownMenuItem(child: Text("Nepal"), value: "NP"),
-                  DropdownMenuItem(child: Text("Bhutan"), value: "BT"),
-                  DropdownMenuItem(child: Text("Mongolia"), value: "MN"),
-                  DropdownMenuItem(child: Text("Afghanistan"), value: "AF"),
-                  DropdownMenuItem(child: Text("Iran"), value: "IR"),
-                  DropdownMenuItem(child: Text("Iraq"), value: "IQ"),
-                  DropdownMenuItem(child: Text("Syria"), value: "SY"),
-                  DropdownMenuItem(child: Text("Yemen"), value: "YE"),
-                  DropdownMenuItem(child: Text("Sudan"), value: "SD"),
-                  DropdownMenuItem(child: Text("Somalia"), value: "SO"),
-                  DropdownMenuItem(child: Text("Zambia"), value: "ZM"),
-                  DropdownMenuItem(child: Text("Uganda"), value: "UG"),
-                  DropdownMenuItem(child: Text("Madagascar"), value: "MG"),
-                  DropdownMenuItem(child: Text("Mozambique"), value: "MZ"),
-                  DropdownMenuItem(child: Text("Zimbabwe"), value: "ZW"),
-                  DropdownMenuItem(child: Text("Paraguay"), value: "PY"),
-                  DropdownMenuItem(child: Text("Bolivia"), value: "BO"),
-                  DropdownMenuItem(child: Text("Venezuela"), value: "VE"),
-                  DropdownMenuItem(child: Text("Uruguay"), value: "UY"),
-                  DropdownMenuItem(child: Text("Ecuador"), value: "EC"),
-                  DropdownMenuItem(child: Text("Honduras"), value: "HN"),
-                  DropdownMenuItem(child: Text("Guatemala"), value: "GT"),
-                  DropdownMenuItem(child: Text("Panama"), value: "PA"),
-                  DropdownMenuItem(child: Text("Costa Rica"), value: "CR"),
-                ],
-                onChanged: (value) {},
-              ),
-              const SizedBox(height: 10),
-              const TextField(
-                decoration: InputDecoration(
-                  labelText: "ZIP",
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Checkbox(value: true, onChanged: (value) {}),
-                  const Text("Save this card for future payments"),
-                ],
-              ),
-              // const SizedBox(height: 10),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () async {
-                 final result = await PaymobPakistan.instance.initializePayment(
-                      currency: "PKR",
-                      amountInCents: (totalPrice * 100).toStringAsFixed(0),
-                    );
-
-                    // Second step: Make Payment
-                    await PaymobPakistan.instance.makePayment(
-                        context,
-                        currency: "PKR",
-                        amountInCents: (totalPrice * 100).toStringAsFixed(0),
-                        paymentType: PaymentType.easypaisa,
-                        authToken: result.authToken,
-                        orderID: result.orderID,
-                        billingData: PaymobBillingData(
-                          phoneNumber: "03205665465",
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        decoration: const InputDecoration(
+                          labelText: "MM / YY",
+                          border: OutlineInputBorder(),
                         ),
-                        onPayment: (response) {
-                          if (response.success) {
-                            // Payment Success
-                            print('Payment successful: ${response.message}');
-                          } else {
-                            // Payment Failed
-                            print('Payment failed: ${response.message}');
-                          }
-                        }
-                    );
-
+                        keyboardType: TextInputType.datetime,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: TextField(
+                        decoration: const InputDecoration(
+                          labelText: "CVC",
+                          border: OutlineInputBorder(),
+                          suffixIcon: Icon(Icons.lock),
+                        ),
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                DropdownButtonFormField<String>(
+                  decoration: const InputDecoration(
+                    labelText: "Country or Region",
+                    border: OutlineInputBorder(),
+                  ),
+                  items: const [
+                    DropdownMenuItem(child: Text("Pakistan"), value: "PK"),
+                    DropdownMenuItem(child: Text("United States"), value: "US"),
+                    DropdownMenuItem(child: Text("Canada"), value: "CA"),
+                    DropdownMenuItem(
+                      child: Text("United Kingdom"),
+                      value: "GB",
+                    ),
+                    DropdownMenuItem(child: Text("Australia"), value: "AU"),
+                    DropdownMenuItem(child: Text("Germany"), value: "DE"),
+                    DropdownMenuItem(child: Text("France"), value: "FR"),
+                    DropdownMenuItem(child: Text("Italy"), value: "IT"),
+                    DropdownMenuItem(child: Text("Spain"), value: "ES"),
+                    DropdownMenuItem(child: Text("Netherlands"), value: "NL"),
+                    DropdownMenuItem(child: Text("Switzerland"), value: "CH"),
+                    DropdownMenuItem(child: Text("Sweden"), value: "SE"),
+                    DropdownMenuItem(child: Text("Norway"), value: "NO"),
+                    DropdownMenuItem(child: Text("Denmark"), value: "DK"),
+                    DropdownMenuItem(child: Text("Finland"), value: "FI"),
+                    DropdownMenuItem(child: Text("Japan"), value: "JP"),
+                    DropdownMenuItem(child: Text("South Korea"), value: "KR"),
+                    DropdownMenuItem(child: Text("China"), value: "CN"),
+                    DropdownMenuItem(child: Text("India"), value: "IN"),
+                    DropdownMenuItem(child: Text("Brazil"), value: "BR"),
+                    DropdownMenuItem(child: Text("Mexico"), value: "MX"),
+                    DropdownMenuItem(child: Text("Argentina"), value: "AR"),
+                    DropdownMenuItem(child: Text("Colombia"), value: "CO"),
+                    DropdownMenuItem(child: Text("Chile"), value: "CL"),
+                    DropdownMenuItem(child: Text("Peru"), value: "PE"),
+                    DropdownMenuItem(child: Text("South Africa"), value: "ZA"),
+                    DropdownMenuItem(child: Text("Nigeria"), value: "NG"),
+                    DropdownMenuItem(child: Text("Egypt"), value: "EG"),
+                    DropdownMenuItem(child: Text("Turkey"), value: "TR"),
+                    DropdownMenuItem(child: Text("Saudi Arabia"), value: "SA"),
+                    DropdownMenuItem(
+                      child: Text("United Arab Emirates"),
+                      value: "AE",
+                    ),
+                    DropdownMenuItem(child: Text("Malaysia"), value: "MY"),
+                    DropdownMenuItem(child: Text("Singapore"), value: "SG"),
+                    DropdownMenuItem(child: Text("Thailand"), value: "TH"),
+                    DropdownMenuItem(child: Text("Vietnam"), value: "VN"),
+                    DropdownMenuItem(child: Text("Indonesia"), value: "ID"),
+                    DropdownMenuItem(child: Text("Philippines"), value: "PH"),
+                    DropdownMenuItem(child: Text("New Zealand"), value: "NZ"),
+                    DropdownMenuItem(child: Text("Russia"), value: "RU"),
+                    DropdownMenuItem(child: Text("Ukraine"), value: "UA"),
+                    DropdownMenuItem(child: Text("Poland"), value: "PL"),
+                    DropdownMenuItem(
+                      child: Text("Czech Republic"),
+                      value: "CZ",
+                    ),
+                    DropdownMenuItem(child: Text("Hungary"), value: "HU"),
+                    DropdownMenuItem(child: Text("Greece"), value: "GR"),
+                    DropdownMenuItem(child: Text("Portugal"), value: "PT"),
+                    DropdownMenuItem(child: Text("Belgium"), value: "BE"),
+                    DropdownMenuItem(child: Text("Austria"), value: "AT"),
+                    DropdownMenuItem(child: Text("Romania"), value: "RO"),
+                    DropdownMenuItem(child: Text("Bulgaria"), value: "BG"),
+                    DropdownMenuItem(child: Text("Serbia"), value: "RS"),
+                    DropdownMenuItem(child: Text("Croatia"), value: "HR"),
+                    DropdownMenuItem(child: Text("Slovakia"), value: "SK"),
+                    DropdownMenuItem(child: Text("Slovenia"), value: "SI"),
+                    DropdownMenuItem(child: Text("Lithuania"), value: "LT"),
+                    DropdownMenuItem(child: Text("Latvia"), value: "LV"),
+                    DropdownMenuItem(child: Text("Estonia"), value: "EE"),
+                    DropdownMenuItem(child: Text("Kazakhstan"), value: "KZ"),
+                    DropdownMenuItem(child: Text("Uzbekistan"), value: "UZ"),
+                    DropdownMenuItem(child: Text("Qatar"), value: "QA"),
+                    DropdownMenuItem(child: Text("Bahrain"), value: "BH"),
+                    DropdownMenuItem(child: Text("Kuwait"), value: "KW"),
+                    DropdownMenuItem(child: Text("Oman"), value: "OM"),
+                    DropdownMenuItem(child: Text("Lebanon"), value: "LB"),
+                    DropdownMenuItem(child: Text("Jordan"), value: "JO"),
+                    DropdownMenuItem(child: Text("Israel"), value: "IL"),
+                    DropdownMenuItem(child: Text("Morocco"), value: "MA"),
+                    DropdownMenuItem(child: Text("Algeria"), value: "DZ"),
+                    DropdownMenuItem(child: Text("Tunisia"), value: "TN"),
+                    DropdownMenuItem(child: Text("Ethiopia"), value: "ET"),
+                    DropdownMenuItem(child: Text("Kenya"), value: "KE"),
+                    DropdownMenuItem(child: Text("Ghana"), value: "GH"),
+                    DropdownMenuItem(child: Text("Ivory Coast"), value: "CI"),
+                    DropdownMenuItem(child: Text("Senegal"), value: "SN"),
+                    DropdownMenuItem(child: Text("Bangladesh"), value: "BD"),
+                    DropdownMenuItem(child: Text("Sri Lanka"), value: "LK"),
+                    DropdownMenuItem(child: Text("Myanmar"), value: "MM"),
+                    DropdownMenuItem(child: Text("Nepal"), value: "NP"),
+                    DropdownMenuItem(child: Text("Bhutan"), value: "BT"),
+                    DropdownMenuItem(child: Text("Mongolia"), value: "MN"),
+                    DropdownMenuItem(child: Text("Afghanistan"), value: "AF"),
+                    DropdownMenuItem(child: Text("Iran"), value: "IR"),
+                    DropdownMenuItem(child: Text("Iraq"), value: "IQ"),
+                    DropdownMenuItem(child: Text("Syria"), value: "SY"),
+                    DropdownMenuItem(child: Text("Yemen"), value: "YE"),
+                    DropdownMenuItem(child: Text("Sudan"), value: "SD"),
+                    DropdownMenuItem(child: Text("Somalia"), value: "SO"),
+                    DropdownMenuItem(child: Text("Zambia"), value: "ZM"),
+                    DropdownMenuItem(child: Text("Uganda"), value: "UG"),
+                    DropdownMenuItem(child: Text("Madagascar"), value: "MG"),
+                    DropdownMenuItem(child: Text("Mozambique"), value: "MZ"),
+                    DropdownMenuItem(child: Text("Zimbabwe"), value: "ZW"),
+                    DropdownMenuItem(child: Text("Paraguay"), value: "PY"),
+                    DropdownMenuItem(child: Text("Bolivia"), value: "BO"),
+                    DropdownMenuItem(child: Text("Venezuela"), value: "VE"),
+                    DropdownMenuItem(child: Text("Uruguay"), value: "UY"),
+                    DropdownMenuItem(child: Text("Ecuador"), value: "EC"),
+                    DropdownMenuItem(child: Text("Honduras"), value: "HN"),
+                    DropdownMenuItem(child: Text("Guatemala"), value: "GT"),
+                    DropdownMenuItem(child: Text("Panama"), value: "PA"),
+                    DropdownMenuItem(child: Text("Costa Rica"), value: "CR"),
+                  ],
+                  onChanged: (value) {
+                    // handle country selection
                   },
+                ),
+                const SizedBox(height: 10),
+                const TextField(
+                  decoration: InputDecoration(
+                    labelText: "ZIP",
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Checkbox(value: true, onChanged: (value) {}),
+                    const Text("Save this card for future payments"),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(context); // Close the bottom sheet
 
-                  icon: const Icon(Icons.lock),
-                  label: Text(
-                    "Pay PKR ${totalPrice.toStringAsFixed(2)}",
-                  ), // Dynamic price
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    backgroundColor: Colors.blue,
+                      // Show the success animation
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) {
+                          Future.delayed(const Duration(seconds: 2), () {
+                            Navigator.of(
+                              context,
+                            ).pop(); // Auto-close dialog after 2 seconds
+                            // Optionally, navigate to another screen here
+                          });
+
+                          return AlertDialog(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Lottie.asset(
+                                  'assets/tick.json',
+                                  width: 120,
+                                  height: 120,
+                                  repeat: false,
+                                ),
+                                const SizedBox(height: 10),
+                                const Text(
+                                  "Payment Successful!",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    icon: const Icon(Icons.lock),
+                    label: Text("Pay PKR ${totalPrice.toStringAsFixed(2)}"),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      backgroundColor: Colors.blue,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -1233,7 +1346,6 @@ class _UserHomeState extends State<UserHome> {
   }
 
   void _showAddressBottomSheet() {
-
     Future<void> _getCurrentLocation() async {
       bool serviceEnabled;
       LocationPermission permission;
@@ -1328,7 +1440,10 @@ class _UserHomeState extends State<UserHome> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide(
-                        color: isPhoneValid ? Colors.grey : Colors.red, // Red border if invalid
+                        color:
+                            isPhoneValid
+                                ? Colors.grey
+                                : Colors.red, // Red border if invalid
                       ),
                     ),
                   ),
@@ -1351,7 +1466,6 @@ class _UserHomeState extends State<UserHome> {
                   onPressed: () async {
                     if (_addressController.text.isNotEmpty &&
                         _phoneController.text.isNotEmpty) {
-
                       String? paymentMethod = await showDialog<String>(
                         context: context,
                         builder: (BuildContext context) {
@@ -1364,7 +1478,8 @@ class _UserHomeState extends State<UserHome> {
                                 child: const Text("Cash on Delivery"),
                               ),
                               TextButton(
-                                onPressed: () => Navigator.pop(context, "Online"),
+                                onPressed:
+                                    () => Navigator.pop(context, "Online"),
                                 child: const Text("Online Payment"),
                               ),
                             ],
@@ -1377,16 +1492,20 @@ class _UserHomeState extends State<UserHome> {
                           Navigator.pop(context);
                         }
                         // debugPrint("Saving Order with: Address: $address, Phone: $phoneNumber, Landmark: $landmark");
-                        String formattedDate = DateFormat('dd-M-yy h:mm a').format(DateTime.now());
+                        String formattedDate = DateFormat(
+                          'dd-M-yy h:mm a',
+                        ).format(DateTime.now());
                         int userId = 1;
                         String address = _addressController.text;
-                        String phoneNumber = _phoneController.text.trim().isNotEmpty
-                            ? _phoneController.text.trim()
-                            : "N/A";
+                        String phoneNumber =
+                            _phoneController.text.trim().isNotEmpty
+                                ? _phoneController.text.trim()
+                                : "N/A";
 
-                        String landmark = _landmarkController.text.trim().isNotEmpty
-                            ? _landmarkController.text.trim()
-                            : "N/A";
+                        String landmark =
+                            _landmarkController.text.trim().isNotEmpty
+                                ? _landmarkController.text.trim()
+                                : "N/A";
                         if (paymentMethod == "Online") {
                           await showPaymentBottomSheet(context);
                         }
@@ -1400,7 +1519,8 @@ class _UserHomeState extends State<UserHome> {
                         for (var item in cartItems) {
                           int foodItemId = item['id'] ?? 0;
                           String foodName = item['name'];
-                          double price = (item['price'] as num?)?.toDouble() ?? 0.0;
+                          double price =
+                              (item['price'] as num?)?.toDouble() ?? 0.0;
                           int quantity = 1;
                           await DatabaseHelper.instance.placeOrder(
                             userId,
@@ -1412,15 +1532,14 @@ class _UserHomeState extends State<UserHome> {
                             foodName,
                             phoneNumber,
                             landmark,
-                              formattedDate,
+                            formattedDate,
                           );
-
                         }
 
                         debugPrint(
-                            paymentMethod == "Cash"
-                                ? "Cash on Delivery order confirmed!"
-                                : "Online payment order confirmed!"
+                          paymentMethod == "Cash"
+                              ? "Cash on Delivery order confirmed!"
+                              : "Online payment order confirmed!",
                         );
 
                         if (mounted) {
@@ -1441,7 +1560,6 @@ class _UserHomeState extends State<UserHome> {
                     style: TextStyle(color: Colors.black),
                   ),
                 ),
-
               ],
             ),
           ),
@@ -1775,6 +1893,4 @@ class _UserHomeState extends State<UserHome> {
       ),
     );
   }
-
-
 }
